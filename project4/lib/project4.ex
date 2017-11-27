@@ -9,9 +9,20 @@ defmodule Project4 do
             IO.puts "Invalid number of arguments."
             System.halt(0)
         end
-
-
-
-        
+ 
   end
+
+  def randomstr(length \\ 15) do
+      Enum.join(["user",:crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)])
+  end
+
+  def genusers(num_user) do
+    for _y <- 1..num_user,
+    do: IO.puts randomstr(num_user)
+  end
+        
+
 end
+
+
+Project4.genusers(10)
