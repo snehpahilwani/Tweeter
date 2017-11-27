@@ -6,6 +6,7 @@ defmodule Project4.Mixfile do
       app: :project4,
       version: "0.1.0",
       elixir: "~> 1.5",
+      escript: [main_module: Project4],
       start_permanent: Mix.env == :prod,
       deps: deps()
     ]
