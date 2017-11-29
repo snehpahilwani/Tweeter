@@ -13,16 +13,16 @@ defmodule Project4 do
   end
 
   def randomstr(length \\ 15) do
-      Enum.join(["user",:crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)])
+      Enum.join(["user",:crypto.strong_rand_bytes(length) |> Base.encode32 |> binary_part(0, length) |> :string.lowercase])
   end
 
   def genusers(num_user) do
     for _y <- 1..num_user,
-    do: IO.puts randomstr(num_user)
+    do: IO.puts randomstr(5)
   end
         
 
 end
 
 
-Project4.genusers(10)
+Project4.genusers(1000) 
