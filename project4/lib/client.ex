@@ -1,5 +1,6 @@
 defmodule Client do
-    def communicate(iter) do
+
+    def communicate(iter, userName) do
         server = :global.whereis_name(:server)
         action_list = ["tweet", "follow", "query", "retweet"]
         user_list = ["user1", "user2", "user3", "user4", "user5"]
@@ -43,15 +44,14 @@ defmodule Client do
                     send(server, {:retweet, Enum.join(["RT @",username," ",randomstr(20)])})
                 
             end
-            communicate(iter - 1)
+            communicate(iter - 1, userName)
         end
-        
+        Process.sleep(:infinity)
     end
 
     def randomstr(length \\ 15) do
       Enum.join(["tweet",:crypto.strong_rand_bytes(length) |> Base.encode32 |> binary_part(0, length) |> :string.lowercase])
     end
+
 end
 
-
-Client.communicate(10)
