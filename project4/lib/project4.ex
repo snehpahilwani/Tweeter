@@ -44,8 +44,8 @@ defmodule Project4 do
     else
       user = "user"<>"#{num_user}"
       pass = "password"
-      following = []
-      followers = []
+      following = ["user1","user2","user3","user4"]
+      followers = ["user1","user2","user3","user4"]
       :ets.insert_new(:user_table, {user, pass, following, followers})
       createUsers(num_user-1)
     end
@@ -81,7 +81,8 @@ defmodule Project4 do
     receive do
       {:tweet, tweet} ->
         IO.puts tweet
-        
+        tweetid = tweetid + 1
+        tweetAPI(tweetid, tweetContent,retweetID)
         #message all followers about the tweet
 
 
@@ -94,10 +95,23 @@ defmodule Project4 do
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
 
-      
+      {:imlive, userName} ->
+          IO.puts "Imlive received from" <> userName
+          follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
+          user_atom = String.to_atom(userName)
+          send(user_atom, follow_list)
     end
     serve()
+    
   end
+
+  def tweetAPI(tweetid, tweetContent,retweetID) do
+    #save the tweet in the DB
+    :ets.insert_new(:user_table, {tweetid, tweetContent,retweetID})
+    
+            #message all followers about the tweet
+  end
+
 
   def parse(tweet) do
       if String.contains?(tweet, "#") or String.contains?(tweet, "@") do
@@ -136,8 +150,4 @@ defmodule Project4 do
 
 
 end
-
-
-string = "hihello dlsjfnj@ljsnd"
-Project4.parse(string)
 
