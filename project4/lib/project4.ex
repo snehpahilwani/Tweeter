@@ -112,5 +112,45 @@ defmodule Project4 do
             #message all followers about the tweet
   end
 
+  def parse(tweet) do
+      if String.contains?(tweet, "#") or String.contains?(tweet, "@") do
+            words_in_tweet = String.split(tweet, " ")
+            hashtag_list = []
+            mention_list = []
+            {hashtag_list, mention_list} = populatelists(length(words_in_tweet), words_in_tweet, hashtag_list, mention_list)
+      end
+      IO.inspect hashtag_list
+      IO.inspect mention_list 
+  end
+
+  def populatelists(iter, list, hashtag_list, mention_list) do
+      if iter < 1 do
+        IO.puts "Work done"
+        {hashtag_list, mention_list}
+        
+      else
+        word = Enum.at(list, iter-1)
+        
+        first_letter = String.first(word)
+        
+        cond do
+            first_letter == "#" ->
+                hashtag_list = hashtag_list ++ [word]
+            first_letter == "@" ->
+                mention_list = mention_list ++ [word]
+            true ->
+                IO.puts "Do nothing"
+        end
+      list = List.delete(list, word)
+      populatelists(iter-1, list, hashtag_list, mention_list)
+      end
+
+  end
+
 
 end
+
+
+string = "hihello dlsjfnj@ljsnd"
+Project4.parse(string)
+
