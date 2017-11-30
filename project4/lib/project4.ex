@@ -12,8 +12,18 @@ defmodule Project4 do
 
             liveNodeMap = %{}
             # start the live nodes
-            
-            goLive(numLive,liveNodeMap)
+            :global.register_name(:server, self())
+            :global.sync()
+
+            numbers = 1..numNodes
+            wholeList = Enum.to_list(numbers)
+            liveNodeMap = goLive(numNodes,numLive,wholeList,liveNodeMap)
+
+            serve()
+
+
+
+
         else
             IO.puts "Invalid number of arguments."
             System.halt(0)
@@ -41,21 +51,53 @@ defmodule Project4 do
     end
   end   
 
-  def goLive(num_user,liveNodeMap) do
+  def goLive(numNodes,numLive,wholeList,liveNodeMap) do
 
-    if num_user <= 10 do
+    if numLive <= 0 do
       #do nothing
       liveNodeMap
     else
+      selectedRandomUser = Enum.random(wholeList)
 
-      user = "user"<>"#{num_user}"
-      if Map.has_key?(liveNodeMap, :user) do:
+      user = "user"<>"#{selectedRandomUser}"
+      if Map.has_key?(liveNodeMap, user) do
+        selectedRandomUser = Enum.random(wholeList)
+        goLive(numNodes,numLive,wholeList,liveNodeMap)
       else
-        put_new(liveNodeMap, user, 1)
-        node_pid = spawn(Client, :communication)
-        goLive(num_user-1,liveNodeMap)
+        Map.put_new(liveNodeMap, user, 1)
+        node_pid = spawn(Client, :communicate, [10, selectedRandomUser])
+        user_atom = String.to_atom(user)
+        IO.puts user_atom
+        :global.register_name(user_atom, node_pid)
+        :global.sync()
+
+        goLive(numNodes,numLive-1,wholeList -- [selectedRandomUser],liveNodeMap)
       end
     end
   end   
+
+
+  def serve() do
+    receive do
+      {:tweet, tweet} ->
+        IO.puts tweet
+        
+        #message all followers about the tweet
+
+
+      {:follow, username} ->
+          IO.puts "User to follow: "<>username
+
+      {:retweet, username} ->
+          IO.puts "Retweet query of username: "<>username
+
+      {:query, hashOrMention} ->
+          IO.puts "Query hashOrMention: "<>hashOrMention
+
+      
+    end
+    serve()
+  end
+
 
 end
