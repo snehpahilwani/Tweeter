@@ -16,15 +16,16 @@ defmodule Client do
                 action_atom == "tweet" ->
                     tweet_type = Enum.random(tweet_type_list)
                     tweet = randomstr(20)
+                    retweetID = "NA"
                     cond do
                         tweet_type == 1 ->
                             send(server, {:tweet, tweet})
                         tweet_type == 2 ->
-                            send(server,{:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list)])})
+                            send(server,{:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list)]), retweetID})
                         tweet_type == 3 ->
-                            send(server, {:tweet, Enum.join([tweet, ' @', randomstr(10)])})
+                            send(server, {:tweet, Enum.join([tweet, ' @', randomstr(10)]),retweetID})
                         tweet_type == 4 ->
-                            send(server, {:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randomstr(10)])})
+                            send(server, {:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randomstr(10)]),retweetID})
                     end 
                 action_atom == "follow" ->
                     username = Enum.random(user_list)
