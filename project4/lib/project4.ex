@@ -4,7 +4,13 @@ defmodule Project4 do
             {numNodes,_} = Integer.parse(Enum.at(args,0))
             {numLive,_} = Integer.parse(Enum.at(args,1))
             
+            # create the required tables
             :ets.new(:user_table, [:set, :protected, :named_table])
+            :ets.new(:tweets_table, [:set, :protected, :named_table])
+            :ets.new(:hashtags, [:set, :protected, :named_table])
+            :ets.new(:user_mentions, [:set, :protected, :named_table])
+
+            #Start creating users for simulation
             createUsers(numNodes)
             # IO.inspect :ets.match(:user_table, {:"user2", :"$1", :"_",:"_"})
             IO.inspect :ets.lookup(:user_table, "user2")
@@ -19,7 +25,7 @@ defmodule Project4 do
             wholeList = Enum.to_list(numbers)
             liveNodeMap = goLive(numNodes,numLive,wholeList,liveNodeMap)
 
-            serve()
+            serve(0)
 
 
 
@@ -46,7 +52,7 @@ defmodule Project4 do
       pass = "password"
       following = []
       followers = []
-      :ets.insert_new(:user_table, {user, pass, following, followers})
+      :ets.insert_new(:tweets_table, {user, pass, following, followers})
       createUsers(num_user-1)
     end
   end   
@@ -77,13 +83,13 @@ defmodule Project4 do
   end   
 
 
-  def serve() do
+  def serve(tweetid) do
     receive do
-      {:tweet, tweet} ->
+      {:tweet, tweetContent,retweetID} ->
         IO.puts tweet
+        tweetid = tweetid + 1
+        tweetAPI(tweetid, tweetContent,retweetID)
         
-        #message all followers about the tweet
-
 
       {:follow, username} ->
           IO.puts "User to follow: "<>username
@@ -96,7 +102,14 @@ defmodule Project4 do
 
       
     end
-    serve()
+    serve(tweetid)
+  end
+
+  def tweetAPI(tweetid, tweetContent,retweetID) do
+    #save the tweet in the DB
+    :ets.insert_new(:user_table, {tweetid, tweetContent,retweetID})
+    
+            #message all followers about the tweet
   end
 
   def parse(tweet) do
