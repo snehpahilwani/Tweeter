@@ -107,19 +107,21 @@ defmodule Project4 do
 
   def tweetAPI(tweetid,userName, tweetContent,retweetID) do
     #save the tweet in the DB
-    :ets.insert_new(:user_table, {tweetid, tweetContent,retweetID})
+    :ets.insert_new(:tweets_table, {tweetid,userName, tweetContent,retweetID})
     
     #message all followers about the tweet
 
     # get all followrs of userName
-    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1"})
     # IO.puts "The followers of "<>userName<>" are:"
     IO.inspect followersList
 
-    Enum.at(followersList,0)
+    # Enum.at(followersList,0)
 
     Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
       IO.inspect follower
+      fol = :global.whereis_name(:follower)
+      send(fol, {:liveTweet,fol, tweetContent})
     end
   end
 
