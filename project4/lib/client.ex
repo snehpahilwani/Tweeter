@@ -15,12 +15,7 @@ defmodule Client do
 
     def doActivities(iter, userName) do
         server = :global.whereis_name(:server)
-        send(server, {:imlive, userName})
-        receive do
-            {:feed, feeddata} ->
-            
-        end
-        
+
         action_list = ["tweet", "follow", "query", "retweet"]
         user_list = ["user1", "user2", "user3", "user4", "user5"]
         hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
@@ -29,6 +24,7 @@ defmodule Client do
 
         receive do
             {:liveTweet, userWhoTweeted,  tweetdata} ->
+                IO.puts "New live feed from "<>"#{userWhoTweeted}"<>": "
                 IO.inspect tweetdata
                 doActivities(iter, userName)
         after 0_200 ->
@@ -45,7 +41,7 @@ defmodule Client do
                         retweetID = "NA"
                         cond do
                             tweet_type == 1 ->
-                                send(server, {:tweet,userName, tweet})
+                                send(server, {:tweet,userName, tweet, retweetID})
                             tweet_type == 2 ->
                                 send(server,{:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list)]), retweetID})
                             tweet_type == 3 ->
@@ -66,9 +62,8 @@ defmodule Client do
                                 mention = Enum.random(user_list)
                                 send(server, {:query, Enum.join(["mention @",mention])})
                         end
-                    action_atom == "retweet" ->
-                        username = Enum.random(user_list)
-                        send(server, {:retweet, Enum.join(["RT @",username," ",randomstr(20)])})
+                        action_atom == "retweet" ->
+                        send(server, {:retweet, userName})
                     
                 end
                 doActivities(iter - 1, userName)

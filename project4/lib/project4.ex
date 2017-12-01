@@ -96,7 +96,10 @@ defmodule Project4 do
           IO.puts "User to follow: "<>username
 
       {:retweet, username} ->
-          IO.puts "Retweet query of username: "<>username
+          IO.puts "Retweet query of username: "<>"#{username}"
+          numbers = 1..tweetid
+          wholeList = Enum.to_list(numbers)
+          selectedRandomTweet = Enum.random(wholeList)
 
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
@@ -142,7 +145,7 @@ defmodule Project4 do
       #Enum.at(followingList,0)
       feedList = []
       Enum.each Enum.at(Enum.at(followingList,0),0), fn following -> 
-          feedList = feedList ++ :ets.match(:tweets_table, {:"_", "user"<>"#{following}",:"$1", :"_", :"$2"})  
+          feedList = feedList ++ :ets.match(:tweets_table, {:"$1", "user"<>"#{following}",:"$2", :"_", :"$3"})  
       end
       feedList
   end
