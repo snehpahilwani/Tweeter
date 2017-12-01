@@ -25,7 +25,7 @@ defmodule Project4 do
             wholeList = Enum.to_list(numbers)
             liveNodeMap = goLive(numNodes,numLive,wholeList,liveNodeMap)
 
-            serve(0)
+            serve(0,liveNodeMap)
 
 
 
@@ -83,12 +83,12 @@ defmodule Project4 do
   end   
 
 
-  def serve(tweetid) do
+  def serve(tweetid,liveNodeMap) do
     receive do
       {:tweet, userName, tweetContent,retweetID} ->
         IO.puts tweetContent
         tweetid = tweetid + 1
-        tweetAPI(tweetid,userName, tweetContent,retweetID)
+        tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap)
         #message all followers about the tweet
         
 
@@ -102,16 +102,18 @@ defmodule Project4 do
           IO.puts "Query hashOrMention: "<>hashOrMention
       
       {:imlive, userName} ->
-          IO.puts "Imlive received from" <> userName
+          IO.puts "Imlive received from" <> "#{userName}"
           #follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
           user_atom = String.to_atom("user"<>"#{userName}")
+          usertosend = :global.whereis_name(user_atom)
           feedList = feedData(userName)
-          send(user_atom, feedList)
+          IO.inspect feedList
+          send(usertosend, {:feed, feedList} )
     end
-    serve(tweetid)
+    serve(tweetid,liveNodeMap)
   end
 
-  def tweetAPI(tweetid,userName, tweetContent,retweetID) do
+  def tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap) do
     #save the tweet in the DB
     timestamp = :os.system_time
     :ets.insert_new(:tweets_table, {tweetid, userName, tweetContent,retweetID, timestamp})
@@ -123,12 +125,13 @@ defmodule Project4 do
     # IO.puts "The followers of "<>userName<>" are:"
     IO.inspect followersList
 
-    # Enum.at(followersList,0)
-
     Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
       IO.inspect follower
-      fol = :global.whereis_name(:follower)
-      send(fol, {:liveTweet,fol, tweetContent})
+      #check if follower is live. If live send live tweet.
+      if Map.has_key?(liveNodeMap, follower) do
+        fol = :global.whereis_name(String.to_atom(follower))
+        send(fol, {:liveTweet,fol, tweetContent})
+      end
     end
   end
 
