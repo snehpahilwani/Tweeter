@@ -120,7 +120,7 @@ defmodule Project4 do
 
 
     # get all followrs of userName
-    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1"})
     # IO.puts "The followers of "<>userName<>" are:"
     IO.inspect followersList
 
@@ -182,3 +182,4 @@ def populatelists(iter, list, hashtag_list, mention_list) do
 end
 
 
+Project4.feedData(6)
