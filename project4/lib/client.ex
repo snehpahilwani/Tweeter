@@ -13,6 +13,16 @@ defmodule Client do
         hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
         query_list = ["hashtag", "mention"]
         tweet_type_list = [1,2,3,4]
+
+        receive do
+            #check for new live tweets
+        after 0_200 ->
+            #else do random activities
+        end
+    
+        
+
+
         if iter < 1 do
             IO.puts "Iterations done!"
             iter
@@ -25,13 +35,13 @@ defmodule Client do
                     retweetID = "NA"
                     cond do
                         tweet_type == 1 ->
-                            send(server, {:tweet, tweet})
+                            send(server, {:tweet,userName, tweet})
                         tweet_type == 2 ->
-                            send(server,{:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list)]), retweetID})
+                            send(server,{:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list)]), retweetID})
                         tweet_type == 3 ->
-                            send(server, {:tweet, Enum.join([tweet, ' @', randomstr(10)]),retweetID})
+                            send(server, {:tweet,userName, Enum.join([tweet, ' @', randomstr(10)]),retweetID})
                         tweet_type == 4 ->
-                            send(server, {:tweet, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randomstr(10)]),retweetID})
+                            send(server, {:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randomstr(10)]),retweetID})
                     end 
                 action_atom == "follow" ->
                     username = Enum.random(user_list)

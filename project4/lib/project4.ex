@@ -5,7 +5,7 @@ defmodule Project4 do
             {numLive,_} = Integer.parse(Enum.at(args,1))
             
             # create the required tables
-            :ets.new(:user_table, [:set, :protected, :named_table])
+            :ets.new(:user_table, [:set, :protected, :named_table])   #
             :ets.new(:tweets_table, [:set, :protected, :named_table])
             :ets.new(:hashtags, [:set, :protected, :named_table])
             :ets.new(:user_mentions, [:set, :protected, :named_table])
@@ -85,12 +85,12 @@ defmodule Project4 do
 
   def serve(tweetid) do
     receive do
-      {:tweet, tweetContent,retweetID} ->
-        IO.puts tweet
+      {:tweet, userName, tweetContent,retweetID} ->
+        IO.puts tweetContent
         tweetid = tweetid + 1
-        tweetAPI(tweetid, tweetContent,retweetID)
-        #message all followers about the tweet
 
+        tweetAPI(tweetid,userName, tweetContent,retweetID)
+        #message all followers about the tweet
 
       {:follow, username} ->
           IO.puts "User to follow: "<>username
@@ -110,49 +110,60 @@ defmodule Project4 do
     serve(tweetid)
   end
 
-  def tweetAPI(tweetid, tweetContent,retweetID) do
+  def tweetAPI(tweetid,userName, tweetContent,retweetID) do
     #save the tweet in the DB
     :ets.insert_new(:user_table, {tweetid, tweetContent,retweetID})
     
-            #message all followers about the tweet
-  end
+    #message all followers about the tweet
 
+
+    # get all followrs of userName
+    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+    # IO.puts "The followers of "<>userName<>" are:"
+    IO.inspect followersList
+
+
+    Enum.at(followersList,0)
+
+    Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
+      IO.inspect follower
+    end
+  end
 
   def parse(tweet) do
-      if String.contains?(tweet, "#") or String.contains?(tweet, "@") do
-            words_in_tweet = String.split(tweet, " ")
-            hashtag_list = []
-            mention_list = []
-            {hashtag_list, mention_list} = populatelists(length(words_in_tweet), words_in_tweet, hashtag_list, mention_list)
-      end
-      IO.inspect hashtag_list
-      IO.inspect mention_list 
-  end
-
-  def populatelists(iter, list, hashtag_list, mention_list) do
-      if iter < 1 do
-        IO.puts "Work done"
-        {hashtag_list, mention_list}
-        
-      else
-        word = Enum.at(list, iter-1)
-        
-        first_letter = String.first(word)
-        
-        cond do
-            first_letter == "#" ->
-                hashtag_list = hashtag_list ++ [word]
-            first_letter == "@" ->
-                mention_list = mention_list ++ [word]
-            true ->
-                IO.puts "Do nothing"
-        end
-      list = List.delete(list, word)
-      populatelists(iter-1, list, hashtag_list, mention_list)
-      end
-
-  end
-
-
+    if String.contains?(tweet, "#") or String.contains?(tweet, "@") do
+          words_in_tweet = String.split(tweet, " ")
+          hashtag_list = []
+          mention_list = []
+          {hashtag_list, mention_list} = populatelists(length(words_in_tweet), words_in_tweet, hashtag_list, mention_list)
+    end
+    IO.inspect hashtag_list
+    IO.inspect mention_list 
 end
+
+
+def populatelists(iter, list, hashtag_list, mention_list) do
+    if iter < 1 do
+      IO.puts "Work done"
+      {hashtag_list, mention_list}
+      
+    else
+      word = Enum.at(list, iter-1)
+      
+      first_letter = String.first(word)
+      
+      cond do
+          first_letter == "#" ->
+              hashtag_list = hashtag_list ++ [word]
+          first_letter == "@" ->
+              mention_list = mention_list ++ [word]
+          true ->
+              IO.puts "Do nothing"
+      end
+    list = List.delete(list, word)
+    populatelists(iter-1, list, hashtag_list, mention_list)
+    end
+  end
+end
+
 
