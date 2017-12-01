@@ -88,25 +88,26 @@ defmodule Project4 do
       {:tweet, userName, tweetContent,retweetID} ->
         IO.puts tweetContent
         tweetid = tweetid + 1
-
         tweetAPI(tweetid,userName, tweetContent,retweetID)
         #message all followers about the tweet
+        
 
-      {:follow, username} ->
-          IO.puts "User to follow: "<>username
+      {:follow, user_to_follow, user_following} ->
+          IO.puts "User to follow: "<>user_to_follow
+          IO.puts "User following "<>user_following
 
       {:retweet, username} ->
           IO.puts "Retweet query of username: "<>username
 
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
-
+      
       {:imlive, userName} ->
           IO.puts "Imlive received from" <> userName
           #follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
           user_atom = String.to_atom("user"<>"#{userName}")
           feedList = feedData(userName)
-          send(user_atom, feedList)
+          send(user_atom, {:feed, feedList})
     end
     serve(tweetid)
   end
@@ -118,22 +119,22 @@ defmodule Project4 do
     
     #message all followers about the tweet
 
-
     # get all followrs of userName
-    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1"})
+    followersList = :ets.match(:user_table, { "user"<>"#{userName}", "user"<>"#{userName}", :"_", :"$1"})
     # IO.puts "The followers of "<>userName<>" are:"
     IO.inspect followersList
 
-
-    Enum.at(followersList,0)
+    # Enum.at(followersList,0)
 
     Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
       IO.inspect follower
+      fol = :global.whereis_name(:follower)
+      send(fol, {:liveTweet,fol, tweetContent})
     end
   end
 
-    def feedData(userName) do
-      followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+  def feedData(userName) do
+      followingList = :ets.match(:user_table, {"user"<>"#{userName}", "user"<>"#{userName}", :"$1", :"_"})
       IO.inspect followingList
 
       #Enum.at(followingList,0)
@@ -155,7 +156,6 @@ defmodule Project4 do
     IO.inspect hashtag_list
     IO.inspect mention_list 
 end
-
 
 def populatelists(iter, list, hashtag_list, mention_list) do
     if iter < 1 do
@@ -182,4 +182,4 @@ def populatelists(iter, list, hashtag_list, mention_list) do
 end
 
 
-Project4.feedData(6)
+#Project4.feedData(6)
