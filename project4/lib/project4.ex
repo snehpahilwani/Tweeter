@@ -99,7 +99,18 @@ defmodule Project4 do
           IO.puts "Retweet query of username: "<>"#{username}"
           numbers = 1..tweetid
           wholeList = Enum.to_list(numbers)
-          selectedRandomTweet = Enum.random(wholeList)
+          selectedRandomTweetID = Enum.random(wholeList)
+          x = :ets.match(:tweets_table, {selectedRandomTweetID, :"_",:"$1",:"_",:"_"})
+          
+          IO.puts "Random tweet row: "
+          IO.inspect x
+          if not empty? x do
+            IO.inspect Enum.at(Enum.at(x,0),0)
+            tweetid = tweetid + 1
+            tweetContent = Enum.at(Enum.at(x,0),0)
+            tweetAPI(tweetid,"user"<>"#{username}", tweetContent,selectedRandomTweetID,liveNodeMap)
+          end
+          
 
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
@@ -116,6 +127,11 @@ defmodule Project4 do
     serve(tweetid,liveNodeMap)
   end
 
+  def empty?([]), do: true
+  def empty?(list) when is_list(list) do
+    false
+  end
+
   def tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap) do
     #save the tweet in the DB
     timestamp = :os.system_time
@@ -126,14 +142,16 @@ defmodule Project4 do
     # get all followrs of userName
     followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1"})
     # IO.puts "The followers of "<>userName<>" are:"
-    IO.inspect followersList
+    # IO.inspect followersList
 
-    Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
-      IO.inspect follower
-      #check if follower is live. If live send live tweet.
-      if Map.has_key?(liveNodeMap, follower) do
-        fol = :global.whereis_name(String.to_atom(follower))
-        send(fol, {:liveTweet,fol, tweetContent})
+    if not empty? followersList do
+      Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
+        # IO.inspect follower
+        #check if follower is live. If live send live tweet.
+        if Map.has_key?(liveNodeMap, follower) do
+          fol = :global.whereis_name(String.to_atom(follower))
+          send(fol, {:liveTweet,fol, tweetContent})
+        end
       end
     end
   end
