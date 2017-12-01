@@ -101,7 +101,7 @@ defmodule Project4 do
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
       
-          {:imlive, userName} ->
+      {:imlive, userName} ->
             IO.puts "Imlive received from" <> userName
             follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
             user_atom = String.to_atom(userName)
