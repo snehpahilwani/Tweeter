@@ -15,12 +15,6 @@ defmodule Client do
 
     def doActivities(iter, userName) do
         server = :global.whereis_name(:server)
-        send(server, {:imlive, userName})
-        receive do
-            {:feed, feeddata} ->
-            
-        end
-        
         action_list = ["tweet", "follow", "query", "retweet"]
         user_list = ["user1", "user2", "user3", "user4", "user5"]
         hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
@@ -55,8 +49,7 @@ defmodule Client do
                         end 
                     action_atom == "follow" ->
                         user_to_follow = Enum.random(user_list)
-                        user_following = userName
-                        send(server, {:follow, user_to_follow, user_following})
+                        send(server, {:follow, user_to_follow, userName})
                     action_atom == "query" ->
                         query = Enum.random(query_list)
                         cond do

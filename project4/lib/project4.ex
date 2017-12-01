@@ -25,7 +25,7 @@ defmodule Project4 do
             wholeList = Enum.to_list(numbers)
             liveNodeMap = goLive(numNodes,numLive,wholeList,liveNodeMap)
 
-            serve(0)
+            serve(0,liveNodeMap)
 
 
 
@@ -83,18 +83,39 @@ defmodule Project4 do
   end   
 
 
-  def serve(tweetid) do
+  def serve(tweetid,liveNodeMap) do
     receive do
       {:tweet, userName, tweetContent,retweetID} ->
         IO.puts tweetContent
         tweetid = tweetid + 1
-        tweetAPI(tweetid,userName, tweetContent,retweetID)
+        tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap)
         #message all followers about the tweet
         
 
       {:follow, user_to_follow, user_following} ->
           IO.puts "User to follow: "<>user_to_follow
-          IO.puts "User following "<>user_following
+          IO.puts "User following: "<>user_following
+          followersList_toFollow = :ets.match(:user_table, { "user"<>"#{user_to_follow}", "user"<>"#{user_to_follow}", :"_", :"$1"})
+          followersList_Following = :ets.match(:user_table, { "user"<>"#{user_following}", "user"<>"#{user_following}", :"_", :"$1"})
+          followingList_toFollow = :ets.match(:user_table, { "user"<>"#{user_to_follow}", "user"<>"#{user_to_follow}", :"$1", :"_"})
+          followingList_Following = :ets.match(:user_table, { "user"<>"#{user_following}", "user"<>"#{user_following}", :"$1", :"_"})
+          
+          Enum.each Enum.at(followersList_toFollow,0), fn newFollowerList -> 
+            IO.inspect newFollowerList
+            newFollowerList = newFollowerList ++ [user_following]
+            IO.inspect newFollowerList
+            :ets.insert(:user_table, {"user"<>"#{user_to_follow}", "user"<>"#{user_to_follow}", followingList_toFollow, newFollowerList})
+          end
+
+
+          Enum.each Enum.at(followingList_Following,0), fn newFollowingList -> 
+            IO.inspect newFollowingList
+            newFollowingList = newFollowingList ++ [user_to_follow]
+            IO.inspect newFollowingList
+            :ets.insert(:user_table, {"user"<>"#{user_following}", "user"<>"#{user_following}", newFollowingList, followersList_Following})
+          end
+
+          
 
       {:retweet, username} ->
           IO.puts "Retweet query of username: "<>username
@@ -103,16 +124,18 @@ defmodule Project4 do
           IO.puts "Query hashOrMention: "<>hashOrMention
       
       {:imlive, userName} ->
-          IO.puts "Imlive received from" <> userName
+          IO.puts "Imlive received from" <> "#{userName}"
           #follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
           user_atom = String.to_atom("user"<>"#{userName}")
+          usertosend = :global.whereis_name(user_atom)
           feedList = feedData(userName)
-          send(user_atom, {:feed, feedList})
+          IO.inspect feedList
+          send(usertosend, {:feed, feedList} )
     end
-    serve(tweetid)
+    serve(tweetid,liveNodeMap)
   end
 
-  def tweetAPI(tweetid,userName, tweetContent,retweetID) do
+  def tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap) do
     #save the tweet in the DB
     timestamp = :os.system_time
     :ets.insert_new(:tweets_table, {tweetid, userName, tweetContent,retweetID, timestamp})
@@ -124,12 +147,13 @@ defmodule Project4 do
     # IO.puts "The followers of "<>userName<>" are:"
     IO.inspect followersList
 
-    # Enum.at(followersList,0)
-
     Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
       IO.inspect follower
-      fol = :global.whereis_name(:follower)
-      send(fol, {:liveTweet,fol, tweetContent})
+      #check if follower is live. If live send live tweet.
+      if Map.has_key?(liveNodeMap, follower) do
+        fol = :global.whereis_name(String.to_atom(follower))
+        send(fol, {:liveTweet,fol, tweetContent})
+      end
     end
   end
 
