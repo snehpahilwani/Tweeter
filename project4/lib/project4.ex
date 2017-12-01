@@ -89,6 +89,7 @@ defmodule Project4 do
         IO.puts tweetContent
         tweetid = tweetid + 1
         tweetAPI(tweetid,userName, tweetContent,retweetID)
+        #message all followers about the tweet
         
 
       {:follow, username} ->
@@ -99,7 +100,13 @@ defmodule Project4 do
 
       {:query, hashOrMention} ->
           IO.puts "Query hashOrMention: "<>hashOrMention
-
+      
+          {:imlive, userName} ->
+            IO.puts "Imlive received from" <> userName
+            follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
+            user_atom = String.to_atom(userName)
+            send(user_atom, follow_list)
+          
       
     end
     serve(tweetid)
