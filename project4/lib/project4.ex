@@ -102,19 +102,19 @@ defmodule Project4 do
           IO.puts "Query hashOrMention: "<>hashOrMention
       
       {:imlive, userName} ->
-            IO.puts "Imlive received from" <> userName
-            follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
-            user_atom = String.to_atom(userName)
-            send(user_atom, follow_list)
-          
-      
+          IO.puts "Imlive received from" <> userName
+          #follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
+          user_atom = String.to_atom("user"<>"#{userName}")
+          feedList = feedData(userName)
+          send(user_atom, feedList)
     end
     serve(tweetid)
   end
 
   def tweetAPI(tweetid,userName, tweetContent,retweetID) do
     #save the tweet in the DB
-    :ets.insert_new(:tweets_table, {tweetid,userName, tweetContent,retweetID})
+    timestamp = :os.system_time
+    :ets.insert_new(:tweets_table, {tweetid, userName, tweetContent,retweetID, timestamp})
     
     #message all followers about the tweet
 
@@ -131,6 +131,19 @@ defmodule Project4 do
       send(fol, {:liveTweet,fol, tweetContent})
     end
   end
+
+    def feedData(userName) do
+      followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+      IO.inspect followingList
+
+      #Enum.at(followingList,0)
+      feedList = []
+      Enum.each Enum.at(Enum.at(followingList,0),0), fn following -> 
+          feedList = feedList ++ :ets.match(:tweets_table, {:"_", "user"<>"#{following}",:"$1", :"_", :"$2"})  
+      end
+      feedList
+  end
+
 
   def parse(tweet) do
     if String.contains?(tweet, "#") or String.contains?(tweet, "@") do
