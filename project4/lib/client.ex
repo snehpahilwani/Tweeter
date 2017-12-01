@@ -2,6 +2,12 @@ defmodule Client do
 
     def communicate(iter, userName) do
         server = :global.whereis_name(:server)
+        send(server, {:imlive, userName})
+        receive do
+            {:feed, feeddata} ->
+            
+        end
+        
         action_list = ["tweet", "follow", "query", "retweet"]
         user_list = ["user1", "user2", "user3", "user4", "user5"]
         hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
