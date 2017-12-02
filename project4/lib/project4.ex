@@ -192,8 +192,50 @@ defmodule Project4 do
           end
           
 
-      {:query, hashOrMention} ->
-          IO.puts "Query hashOrMention: "<>hashOrMention
+      {:query, userName, hashOrMention} ->
+          first_letter = String.first(hashOrMention)
+          queryList = []
+          cond do
+            first_letter == "@" ->
+              #mention = String.split(hashOrMention, "@")
+              IO.puts "Querying Mention: "<> "#{hashOrMention}"
+              mention_row = Enum.at(:ets.lookup(:user_table, hashOrMention),0)
+              if mention_row != nil do
+                tweet_ids = elem(mention_row,4)
+                Enum.each tweet_ids, fn tweet_id ->
+                  tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
+                  IO.puts "Tweet Content after Mention: "
+                  IO.inspect tweetContent
+                  queryList = queryList ++ [tweetContent]
+                end  
+              end
+              # IO.puts "Query List before"
+              # IO.inspect queryList
+              
+            first_letter == "#" ->
+              #hashtag = String.split(hashOrMention, "#")
+              IO.puts "Querying Hashtag: "<> "#{hashOrMention}"
+              hashtag_row = Enum.at(:ets.lookup(:hashtags, hashOrMention),0)
+              if hashtag_row != nil do
+                tweet_ids = elem(hashtag_row,1)
+                Enum.each tweet_ids, fn tweet_id ->
+                  tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
+                  IO.puts "Tweet Content after Hashtag: "
+                  IO.inspect tweetContent
+                  queryList = queryList ++ [tweetContent]
+                end  
+              end
+              # IO.puts "Query List before"
+              # IO.inspect queryList
+            true ->
+              IO.puts "Do nothing"
+            end
+            user_atom = String.to_atom("user"<>"#{userName}")
+            usertosend = :global.whereis_name(user_atom)
+            IO.puts "Query List After Returned: "
+            IO.inspect queryList
+            send(usertosend, {:feed, queryList})
+          #end
       
       {:imlive, userName} ->
           IO.puts "Imlive received from" <> "#{userName}"
@@ -233,6 +275,7 @@ defmodule Project4 do
         end
         final_tweet_list = final_tweet_list ++ [tweetid]
         :ets.insert(:hashtags, {hashtag, final_tweet_list})
+        IO.puts "hashtag list: "
         IO.inspect :ets.lookup(:hashtags, hashtag )
       end
       

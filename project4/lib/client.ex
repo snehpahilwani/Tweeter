@@ -58,10 +58,12 @@ defmodule Client do
                         cond do
                             query == "hashtag" ->
                                 hashtag = Enum.random(hashtag_list)
-                                send(server, {:query, Enum.join(["query #",hashtag])})
+                                
+                                send(server, {:query, userName, Enum.join(["#",hashtag])})
                             query == "mention" ->
                                 mention = Enum.random(user_list)
-                                send(server, {:query, Enum.join(["mention @",mention])})
+                                
+                                send(server, {:query, userName, Enum.join(["@",mention])})
                         end
                         action_atom == "retweet" ->
                         send(server, {:retweet, userName})
