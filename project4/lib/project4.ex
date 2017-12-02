@@ -5,10 +5,10 @@ defmodule Project4 do
             {numLive,_} = Integer.parse(Enum.at(args,1))
             
             # create the required tables
-            :ets.new(:user_table, [:set, :protected, :named_table])   #
+            :ets.new(:user_table, [:set, :protected, :named_table])   
             :ets.new(:tweets_table, [:set, :protected, :named_table])
             :ets.new(:hashtags, [:set, :protected, :named_table])
-            :ets.new(:user_mentions, [:set, :protected, :named_table])
+            #:ets.new(:user_mentions, [:set, :protected, :named_table])
 
             #Start creating users for simulation
             createUsers(numNodes)
@@ -51,8 +51,9 @@ defmodule Project4 do
       user = "user"<>"#{num_user}"
       pass = "password"
       following = ["user1","user2","user3","user4"]
-      followers = ["user1","user2","user3","user4"]
-      :ets.insert_new(:user_table, {user, pass, following, followers})
+      followers = ["user1","user2","user3","user4"] 
+      mentions = []#Adding 
+      :ets.insert_new(:user_table, {user, pass, following, followers, mentions})
       createUsers(num_user-1)
     end
   end   
@@ -71,7 +72,7 @@ defmodule Project4 do
         goLive(numNodes,numLive,wholeList,liveNodeMap)
       else
         Map.put_new(liveNodeMap, user, 1)
-        node_pid = spawn(Client, :communicate, [10, selectedRandomUser])
+        node_pid = spawn(Client, :communicate, [10, numNodes, selectedRandomUser])
         user_atom = String.to_atom(user)
         IO.puts user_atom
         :global.register_name(user_atom, node_pid)
@@ -96,16 +97,29 @@ defmodule Project4 do
         tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap)
         #message all followers about the tweet
         
+      {:logoff, numNodes, userName} ->
+        userName = Enum.join(["user", userName])
+        IO.puts Enum.join(["Logging off: ", userName])
+        liveNodeMap = Map.delete(liveNodeMap, userName)
+        numbers = 1..numNodes
+        wholeList = Enum.to_list(numbers)
+        goLive(numNodes,1,wholeList,liveNodeMap)
+      
 
       {:follow, user_to_follow, user_following} ->
           IO.puts "Follow  request received from" <> "#{user_following}" <> "to follow" <> "#{user_to_follow}"
           IO.puts "User to follow: "<>user_to_follow
           IO.puts "User who wants to follow: "<>user_following
-          followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1"})
-          followersList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"_", :"$1"})
+          followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
+          followersList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"_", :"$1", :"_"})
 
-          followingList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"$1", :"_"})
-          followingList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"$1", :"_"})   
+          followingList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"$1", :"_", :"_"})
+          followingList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"$1", :"_", :"_"})
+
+          # mentionList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"_", :"$1"})
+          # mentionList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"_", :"_", :"$1"})   
+          mentionList_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),4)
+          mentionList_Following = elem(Enum.at(:ets.lookup(:user_table, "#{user_following}"),0),4)
 
           # newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
           IO.puts user_to_follow <> " Follower list before"
@@ -146,8 +160,17 @@ defmodule Project4 do
           end
           IO.inspect final_followingList_Following
 
-          :ets.insert(:user_table, {"#{user_to_follow}", "password", final_followingList_to_follow, final_followersList_to_follow})
-          :ets.insert(:user_table, {"#{user_following}", "password", final_followersList_Following, final_followingList_Following})
+          # if not empty? mentionList_Following do
+          #   final_mentionList_Following = Enum.at(Enum.at(mentionList_Following,0),0)
+          
+          # end
+
+          # if not empty? mentionList_toFollow do
+          #   final_mentionList_toFollow = Enum.at(Enum.at(mentionList_toFollow,0),0)
+          # end
+
+          :ets.insert(:user_table, {"#{user_to_follow}", "password", final_followingList_to_follow, final_followersList_to_follow, mentionList_toFollow})
+          :ets.insert(:user_table, {"#{user_following}", "password", final_followersList_Following, final_followingList_Following, mentionList_Following})
 
 
           
@@ -159,8 +182,8 @@ defmodule Project4 do
           selectedRandomTweetID = Enum.random(wholeList)
           x = :ets.match(:tweets_table, {selectedRandomTweetID, :"_",:"$1",:"_",:"_"})
           
-          IO.puts "Random tweet row: "
-          IO.inspect x
+          # IO.puts "Random tweet row: "
+          # IO.inspect x
           if not empty? x do
             IO.inspect Enum.at(Enum.at(x,0),0)
             tweetid = tweetid + 1
@@ -193,11 +216,51 @@ defmodule Project4 do
     #save the tweet in the DB
     timestamp = :os.system_time
     :ets.insert_new(:tweets_table, {tweetid, userName, tweetContent,retweetID, timestamp})
+    {hashtag_list, mention_list} = parse(tweetContent)
+    #putting hashtag in hashtag ETS
+    IO.puts "Tweet ID: "
+    IO.puts tweetContent
+    IO.inspect tweetid
+    if hashtag_list != nil do
+      Enum.each hashtag_list, fn hashtag ->
+        #Insert with the hashtag
+        IO.puts "hashtag" <> hashtag
+        tweet_list = :ets.match(:hashtags, {hashtag, :"$1"})
+        if not empty? tweet_list do
+            final_tweet_list = Enum.at(Enum.at(tweet_list,0),0)
+        else
+            final_tweet_list = []
+        end
+        final_tweet_list = final_tweet_list ++ [tweetid]
+        :ets.insert(:hashtags, {hashtag, final_tweet_list})
+        IO.inspect :ets.lookup(:hashtags, hashtag )
+      end
+      
+    end
+
+    if mention_list != nil do
+      Enum.each mention_list, fn mention ->
+      
+        mention = Enum.at(String.split(mention, "@"),1)
+        IO.puts "mention" <> mention
+        mention_row = Enum.at(:ets.lookup(:user_table, mention),0)
+        following = elem(mention_row,2)
+        followers = elem(mention_row,3)
+        if mention_row != nil do
+          mention_list = elem(mention_row,4)  
+        else
+          mention_list = []
+        end
+        mention_list = mention_list ++ [tweetid]
+        :ets.insert(:user_table, {mention, "password", following, followers, mention_list})
+        IO.inspect :ets.lookup(:user_table, mention )
+      end  
+    end      
     
     #message all followers about the tweet
 
     # get all followrs of userName
-    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1"})
+    followersList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"_", :"$1", :"_"})
     # IO.puts "The followers of "<>userName<>" are:"
     # IO.inspect followersList
 
@@ -214,7 +277,7 @@ defmodule Project4 do
   end
 
     def feedData(userName) do
-      followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_"})
+      followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_", :"_"})
       IO.inspect followingList
 
       #Enum.at(followingList,0)
@@ -233,8 +296,7 @@ defmodule Project4 do
           mention_list = []
           {hashtag_list, mention_list} = populatelists(length(words_in_tweet), words_in_tweet, hashtag_list, mention_list)
     end
-    IO.inspect hashtag_list
-    IO.inspect mention_list 
+    {hashtag_list, mention_list}
 end
 
 def populatelists(iter, list, hashtag_list, mention_list) do
