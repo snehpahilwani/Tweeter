@@ -9,11 +9,19 @@ defmodule Project4 do
             :ets.new(:tweets_table, [:set, :protected, :named_table])
             :ets.new(:hashtags, [:set, :protected, :named_table])
             #:ets.new(:user_mentions, [:set, :protected, :named_table])
-
+            userList = Enum.to_list(1..numNodes)
+            newuserList = Enum.map(userList, fn(x)->Enum.join(["user",x]) end)
+            getZipfDist(length(newuserList), newuserList)
+            IO.puts "User table values check"
+            IO.inspect :ets.lookup(:user_table, "user1")
+            IO.inspect :ets.lookup(:user_table, "user2")
+            IO.inspect :ets.lookup(:user_table, "user3")
+            IO.inspect :ets.lookup(:user_table, "user4")
+            IO.inspect :ets.lookup(:user_table, "user5")
             #Start creating users for simulation
             createUsers(numNodes)
             # IO.inspect :ets.match(:user_table, {:"user2", :"$1", :"_",:"_"})
-            IO.inspect :ets.lookup(:user_table, "user2")
+            #IO.inspect :ets.lookup(:user_table, "user2")
             # IO.puts user
 
             liveNodeMap = %{}
@@ -44,18 +52,27 @@ defmodule Project4 do
   # end
 
   def createUsers(num_user) do
-
+    IO.puts "Getting into createUsers method"
     if num_user <= 0 do
       #do nothing
     else
       user = "user"<>"#{num_user}"
       pass = "password"
-      following = ["user1","user2","user3","user4"]
-      followers = ["user1","user2","user3","user4"] 
-      mentions = []#Adding 
-      :ets.insert_new(:user_table, {user, pass, following, followers, mentions})
+      # following = ["user1","user2","user3","user4"]
+      # followers = ["user1","user2","user3","user4"] 
+      followers = elem(Enum.at(:ets.lookup(:user_table, user),0),3)
+      mentions = []
+      Enum.each followers, fn follower ->
+        follow(user, follower)
+      end
+      IO.puts "Came out of loop"
+      IO.inspect :ets.lookup(:user_table, user)
+      #follow(user_to_follow, user_who_wants_to_follow)
+      #:ets.insert_new(:user_table, {user, pass, following, followers, mentions})
       createUsers(num_user-1)
     end
+    IO.puts "User table for" <> "#{user}"
+    IO.inspect :ets.lookup(:user_table, user)
   end   
 
   def goLive(numNodes,numLive,passiveList,liveNodeMap) do
@@ -120,74 +137,8 @@ defmodule Project4 do
         goLive(numNodes,1,passiveList,liveNodeMap)
       
 
-      {:follow, user_to_follow, user_following} ->
-          IO.puts "Follow  request received from" <> "#{user_following}" <> "to follow" <> "#{user_to_follow}"
-          IO.puts "User to follow: "<>user_to_follow
-          IO.puts "User who wants to follow: "<>user_following
-          followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
-          followersList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"_", :"$1", :"_"})
-
-          followingList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"$1", :"_", :"_"})
-          followingList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"$1", :"_", :"_"})
-
-          # mentionList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"_", :"$1"})
-          # mentionList_Following = :ets.match(:user_table, { "#{user_following}", :"_", :"_", :"_", :"$1"})   
-          mentionList_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),4)
-          mentionList_Following = elem(Enum.at(:ets.lookup(:user_table, "#{user_following}"),0),4)
-
-          # newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
-          IO.puts user_to_follow <> " Follower list before"
-          IO.inspect followersList_toFollow
-          IO.puts user_to_follow <> " Follower list after"
-          if not empty? followersList_toFollow do
-            final_followersList_to_follow =  Enum.at(Enum.at(followersList_toFollow,0),0)
-            if not Enum.member?(final_followersList_to_follow, user_following) do
-              final_followersList_to_follow = final_followersList_to_follow ++ [user_following]
-            end
-          end
-          IO.inspect final_followersList_to_follow
-
-          IO.puts user_to_follow <> " Following list before"
-          IO.inspect followingList_toFollow
-          IO.puts user_to_follow <> " Following list after"
-          if not empty? followingList_toFollow do
-            final_followingList_to_follow = Enum.at(Enum.at(followingList_toFollow,0),0)
-          end
-          IO.inspect final_followingList_to_follow
-
-          IO.puts user_following<>" Follower list before"
-          IO.inspect followersList_Following
-          IO.puts user_following<>" Follower list after"
-          if not empty? followersList_Following do
-            final_followersList_Following = Enum.at(Enum.at(followersList_Following,0),0)
-          end
-          IO.inspect final_followersList_Following
-
-          IO.puts user_following<>" Following list before"
-          IO.inspect followingList_Following
-          IO.puts user_following<>" Following list after"
-          if not empty? followingList_Following do
-            final_followingList_Following = Enum.at(Enum.at(followingList_Following,0),0)
-            if not Enum.member?(final_followingList_Following, user_to_follow) do
-              final_followingList_Following = final_followingList_Following ++ [user_to_follow]
-            end
-          end
-          IO.inspect final_followingList_Following
-
-          # if not empty? mentionList_Following do
-          #   final_mentionList_Following = Enum.at(Enum.at(mentionList_Following,0),0)
-          
-          # end
-
-          # if not empty? mentionList_toFollow do
-          #   final_mentionList_toFollow = Enum.at(Enum.at(mentionList_toFollow,0),0)
-          # end
-
-          :ets.insert(:user_table, {"#{user_to_follow}", "password", final_followingList_to_follow, final_followersList_to_follow, mentionList_toFollow})
-          :ets.insert(:user_table, {"#{user_following}", "password", final_followersList_Following, final_followingList_Following, mentionList_Following})
-
-
-          
+      {:follow, user_to_follow, user_who_wants_to_follow} ->
+        follow(user_to_follow, user_who_wants_to_follow)
 
       {:retweet, username} ->
           IO.puts "Retweet query of username: "<>"#{username}"
@@ -408,7 +359,95 @@ def populatelists(iter, list, hashtag_list, mention_list) do
     populatelists(iter-1, list, hashtag_list, mention_list)
     end
   end
+
+  def getZipfDist(numClients, clientList) do
+    distList=[]
+    c=Enum.reduce(1..numClients,0,fn(x,acc)->(1/x)+acc end )
+    c=1/c
+    distList=Enum.map(1..numClients,fn(x)->:math.ceil((c*numClients)/x) end)
+    #IO.inspect distList
+    zipfMap = %{}
+    distList |> Enum.zip(clientList) 
+        |> Enum.map(fn {dist, client} -> 
+            rounded_dist =  round(dist)
+
+            randomUserList = Enum.take_random(List.delete(clientList,client), rounded_dist)
+
+            #Map.put(zipfMap, client, randomUserList)
+            :ets.insert_new(:user_table, {client, "password", [], randomUserList, []})
+        end)
+  end
+
+
+  def follow(user_to_follow, user_who_wants_to_follow) do
+          IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
+          IO.puts "User to follow: "<>user_to_follow
+          IO.puts "User who wants to follow: "<>user_who_wants_to_follow
+          followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
+          followersList_user_who_wants_to_follow = :ets.match(:user_table, { "#{user_who_wants_to_follow}", :"_", :"_", :"$1", :"_"})
+
+          followingList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"$1", :"_", :"_"})
+          followingList_user_who_wants_to_follow = :ets.match(:user_table, { "#{user_who_wants_to_follow}", :"_", :"$1", :"_", :"_"})
+
+          # mentionList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"_", :"$1"})
+          # mentionList_user_who_wants_to_follow = :ets.match(:user_table, { "#{user_who_wants_to_follow}", :"_", :"_", :"_", :"$1"})   
+          mentionList_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),4)
+          mentionList_user_who_wants_to_follow = elem(Enum.at(:ets.lookup(:user_table, "#{user_who_wants_to_follow}"),0),4)
+
+          IO.puts user_to_follow <> " Following list before"
+          IO.inspect followingList_toFollow
+          IO.puts user_to_follow <> " Following list after"
+          if not empty? followingList_toFollow do
+            final_followingList_to_follow = Enum.at(Enum.at(followingList_toFollow,0),0)
+          end
+          IO.inspect final_followingList_to_follow
+
+
+          # newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
+          IO.puts user_to_follow <> " Follower list before"
+          IO.inspect followersList_toFollow
+          IO.puts user_to_follow <> " Follower list after"
+          if not empty? followersList_toFollow do
+            final_followersList_to_follow =  Enum.at(Enum.at(followersList_toFollow,0),0)
+            if not Enum.member?(final_followersList_to_follow, user_who_wants_to_follow) do
+              final_followersList_to_follow = final_followersList_to_follow ++ [user_who_wants_to_follow]
+              :ets.insert(:user_table, {"#{user_to_follow}", "password", final_followingList_to_follow, final_followersList_to_follow, mentionList_toFollow})
+            end
+          end
+          IO.inspect final_followersList_to_follow
+
+
+          IO.puts user_who_wants_to_follow<>" Follower list before"
+          IO.inspect followersList_user_who_wants_to_follow
+          IO.puts user_who_wants_to_follow<>" Follower list after"
+          if not empty? followersList_user_who_wants_to_follow do
+            final_followersList_user_who_wants_to_follow = Enum.at(Enum.at(followersList_user_who_wants_to_follow,0),0)
+          end
+          IO.inspect final_followersList_user_who_wants_to_follow
+
+          IO.puts user_who_wants_to_follow<>" Following list before"
+          IO.inspect followingList_user_who_wants_to_follow
+          IO.puts user_who_wants_to_follow<>" Following list after"
+          if not empty? followingList_user_who_wants_to_follow do
+            final_followingList_user_who_wants_to_follow = Enum.at(Enum.at(followingList_user_who_wants_to_follow,0),0)
+            if not Enum.member?(final_followingList_user_who_wants_to_follow, user_to_follow) do
+              final_followingList_user_who_wants_to_follow = final_followingList_user_who_wants_to_follow ++ [user_to_follow]
+              :ets.insert(:user_table, {"#{user_who_wants_to_follow}", "password", final_followingList_user_who_wants_to_follow, final_followersList_user_who_wants_to_follow, mentionList_user_who_wants_to_follow})
+            end
+          end
+          IO.inspect final_followingList_user_who_wants_to_follow
+
+          # if not empty? mentionList_user_who_wants_to_follow do
+          #   final_mentionList_user_who_wants_to_follow = Enum.at(Enum.at(mentionList_user_who_wants_to_follow,0),0)
+          
+          # end
+
+          # if not empty? mentionList_toFollow do
+          #   final_mentionList_toFollow = Enum.at(Enum.at(mentionList_toFollow,0),0)
+          # end
+
+          
+          
+
+  end
 end
-
-
-#Project4.feedData(6)
