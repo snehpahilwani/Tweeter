@@ -3,6 +3,12 @@ defmodule Project4 do
         if Enum.count(args) == 2 do
             {numNodes,_} = Integer.parse(Enum.at(args,0))
             {numLive,_} = Integer.parse(Enum.at(args,1))
+
+            if numLive > numNodes do
+              IO.puts "Number of online users cannot be greater than total users in the system."
+              IO.puts "Please provide input as ./project4 <Total no. of users> <# oflive users>"
+              System.halt(0)
+            end
             
             # create the required tables
             :ets.new(:user_table, [:set, :protected, :named_table])   
@@ -15,9 +21,6 @@ defmodule Project4 do
             getZipfDist(length(newuserList), newuserList)
             #Start creating users for simulation
             createUsers(numNodes)
-            # IO.inspect :ets.match(:user_table, {:"user2", :"$1", :"_",:"_"})
-            #IO.inspect :ets.lookup(:user_table, "user2")
-            # IO.puts user
 
             liveNodeMap = %{}
             # start the live nodes
@@ -43,16 +46,9 @@ defmodule Project4 do
  
   end
 
-  # def randomstr(length \\ 15) do
-  #     Enum.join(["user",:crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)])
-  # user = Enum.join(["user",:crypto.strong_rand_bytes(5) |> Base.encode64 |> binary_part(0, 5)])
-  #     Enum.join(["user",:crypto.strong_rand_bytes(length) |> Base.encode32 |> binary_part(0, length) |> :string.lowercase])
-  # end
-
   def createUsers(num_user) do
-    IO.puts "Getting into createUsers method"
     if num_user <= 0 do
-      #do nothing
+      #do nothing and return
     else
       user = "user"<>"#{num_user}"
       pass = "password"
@@ -61,13 +57,10 @@ defmodule Project4 do
       Enum.each followers, fn follower ->
         follow(user, follower)
       end
-      IO.inspect :ets.lookup(:user_table, user)
       #follow(user_to_follow, user_who_wants_to_follow)
       #:ets.insert_new(:user_table, {user, pass, following, followers, mentions})
       createUsers(num_user-1)
     end
-    IO.puts "User table for" <> "#{user}"
-    IO.inspect :ets.lookup(:user_table, user)
   end   
 
   def goLive(numNodes,numLive,passiveList,liveNodeMap) do
@@ -81,27 +74,16 @@ defmodule Project4 do
       user = "user"<>"#{selectedRandomUser}"
       user_atom = String.to_atom(user)
       if Map.has_key?(liveNodeMap, user_atom) do
-        IO.puts "The passive list is:"
-        IO.inspect passiveList
-        IO.puts "The liveNodemap is:"
-        IO.inspect liveNodeMap
+        
         selectedRandomUser = Enum.random(passiveList)
         goLive(numNodes,numLive,passiveList,liveNodeMap)
       else
-        IO.puts "The passive list is:"
-        IO.inspect passiveList
-        IO.puts "The liveNodemap is:"
-        IO.inspect liveNodeMap
-        IO.inspect Map.keys(liveNodeMap)
-
         user_atom = String.to_atom(user)
         liveNodeMap = Map.put_new(liveNodeMap, user_atom, 1)
-        if Map.has_key?(liveNodeMap, user_atom) do
-          IO.puts "Working livemap"
-        end
+        
         node_pid = spawn(Client, :communicate, [10, numNodes, selectedRandomUser])
         user_atom = String.to_atom(user)
-        IO.puts user_atom
+        # IO.puts user_atom
         :global.register_name(user_atom, node_pid)
         :global.sync()
         passiveList = passiveList -- [selectedRandomUser]
@@ -117,12 +99,15 @@ defmodule Project4 do
   end
 
   def serve(tweetid,numNodes,liveNodeMap,passiveList) do
-    IO.puts "Tweet Count"
-    IO.inspect tweetid
+    # IO.puts "Tweet Count"
+    # IO.inspect tweetid
     receive do
       {:tweet, userName, tweetContent,retweetID} ->
+        IO.puts "Tweet from user: "<>"user"<>"#{userName}"
         IO.puts tweetContent
         tweetid = tweetid + 1
+        IO.puts "Total Tweet Count"
+        IO.inspect tweetid
         tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap)
         #message all followers about the tweet
         
@@ -138,16 +123,14 @@ defmodule Project4 do
         follow(user_to_follow, user_who_wants_to_follow)
 
       {:retweet, username} ->
-          IO.puts "Retweet query of username: "<>"#{username}"
+          IO.puts "Retweet by username: "<>"user"<>"#{username}"
           numbers = 1..tweetid
           wholeList = Enum.to_list(numbers)
           selectedRandomTweetID = Enum.random(wholeList)
           x = :ets.match(:tweets_table, {selectedRandomTweetID, :"_",:"$1",:"_",:"_"})
-          
-          # IO.puts "Random tweet row: "
-          # IO.inspect x
+     
           if not empty? x do
-            IO.inspect Enum.at(Enum.at(x,0),0)
+            # IO.inspect Enum.at(Enum.at(x,0),0)
             tweetid = tweetid + 1
             tweetContent = Enum.at(Enum.at(x,0),0)
             tweetAPI(tweetid,"user"<>"#{username}", tweetContent,selectedRandomTweetID,liveNodeMap)
@@ -188,7 +171,7 @@ defmodule Project4 do
               # IO.puts "Query List before"
               # IO.inspect queryList
             true ->
-              IO.puts "Do nothing"
+              # IO.puts "Do nothing"
             end
             user_atom = String.to_atom("user"<>"#{userName}")
             usertosend = :global.whereis_name(user_atom)
@@ -201,14 +184,14 @@ defmodule Project4 do
           #end
       
       {:imlive, userName} ->
-          IO.puts "Imlive received from" <> "#{userName}"
+          # IO.puts "Imlive received from" <> "#{userName}"
           #follow_list = :ets.match(:user_lookup, {userName, userName, :"$1",:"$2"})
           user_atom = String.to_atom("user"<>"#{userName}")
           usertosend = :global.whereis_name(user_atom)
           feedList = feedData(userName)
           IO.inspect feedList
-          IO.inspect liveNodeMap
-          IO.inspect passiveList
+          # IO.inspect liveNodeMap
+          # IO.inspect passiveList
           send(usertosend, {:feed, feedList} )
     end
     serve(tweetid,numNodes,liveNodeMap,passiveList)
@@ -216,13 +199,12 @@ defmodule Project4 do
 
 
   def buildList(tweet_ids,list,index) do
-    IO.puts "Entered build list"
+   
     if index < 0 do
       list
     else
       tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, Enum.at(tweet_ids,index)),0),2)
-      IO.puts "Tweet Content after Mention: "
-      IO.inspect tweetContent
+      
       list = list ++ [tweetContent]
       buildList(tweet_ids,list,index-1)
     end
@@ -247,13 +229,13 @@ defmodule Project4 do
     :ets.insert_new(:tweets_table, {tweetid, userName, tweetContent,retweetID, timestamp})
     {hashtag_list, mention_list} = parse(tweetContent)
     #putting hashtag in hashtag ETS
-    IO.puts "Tweet ID: "
-    IO.puts tweetContent
-    IO.inspect tweetid
+    # IO.puts "Tweet: "
+    # IO.puts tweetContent
+    # IO.inspect tweetid
     if hashtag_list != nil do
       Enum.each hashtag_list, fn hashtag ->
         #Insert with the hashtag
-        IO.puts "hashtag" <> hashtag
+        # IO.puts "hashtag" <> hashtag
         tweet_list = :ets.match(:hashtags, {hashtag, :"$1"})
         if not empty? tweet_list do
             final_tweet_list = Enum.at(Enum.at(tweet_list,0),0)
@@ -262,8 +244,8 @@ defmodule Project4 do
         end
         final_tweet_list = final_tweet_list ++ [tweetid]
         :ets.insert(:hashtags, {hashtag, final_tweet_list})
-        IO.puts "hashtag list: "
-        IO.inspect :ets.lookup(:hashtags, hashtag )
+        # IO.puts "hashtag list: "
+        # IO.inspect :ets.lookup(:hashtags, hashtag )
       end
       
     end
@@ -272,7 +254,7 @@ defmodule Project4 do
       Enum.each mention_list, fn mention ->
       
         mention = Enum.at(String.split(mention, "@"),1)
-        IO.puts "mention" <> mention
+        # IO.puts "mention" <> mention
         mention_row = Enum.at(:ets.lookup(:user_table, mention),0)
         following = elem(mention_row,2)
         followers = elem(mention_row,3)
@@ -283,7 +265,7 @@ defmodule Project4 do
         end
         mention_list = mention_list ++ [tweetid]
         :ets.insert(:user_table, {mention, "password", following, followers, mention_list})
-        IO.inspect :ets.lookup(:user_table, mention )
+        # IO.inspect :ets.lookup(:user_table, mention )
       end  
     end      
     
@@ -297,14 +279,14 @@ defmodule Project4 do
     if not empty? followersList do
       Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
         IO.puts "live tweet"
-        # IO.inspect follower
+        # IO.inspect er
         #check if follower is live. If live send live tweet.
         # IO.inspect liveNodeMap
 
         follower_atom = String.to_atom(follower)
         if Map.has_key?(liveNodeMap, follower_atom) do
-          IO.puts "Sending to user"
-          IO.inspect follower
+          # IO.puts "Sending to user"
+          # IO.inspect follower
           fol = :global.whereis_name(String.to_atom(follower))
           if fol != :undefined do
             send(fol, {:liveTweet,"user"<>"#{userName}", tweetContent})
@@ -317,7 +299,7 @@ defmodule Project4 do
 
   def feedData(userName) do
     followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_", :"_"})
-    IO.inspect followingList
+    # IO.inspect followingList
 
     #Enum.at(followingList,0)
     feedList = []
@@ -342,7 +324,6 @@ end
 
 def populatelists(iter, list, hashtag_list, mention_list) do
     if iter < 1 do
-      IO.puts "Work done"
       {hashtag_list, mention_list}
       
     else
@@ -383,9 +364,9 @@ def populatelists(iter, list, hashtag_list, mention_list) do
 
 
   def follow(user_to_follow, user_who_wants_to_follow) do
-          IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
-          IO.puts "User to follow: "<>user_to_follow
-          IO.puts "User who wants to follow: "<>user_who_wants_to_follow
+          # IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
+          # IO.puts "User to follow: "<>user_to_follow
+          # IO.puts "User who wants to follow: "<>user_who_wants_to_follow
           followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
           followersList_user_who_wants_to_follow = :ets.match(:user_table, { "#{user_who_wants_to_follow}", :"_", :"_", :"$1", :"_"})
 
@@ -397,19 +378,19 @@ def populatelists(iter, list, hashtag_list, mention_list) do
           mentionList_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),4)
           mentionList_user_who_wants_to_follow = elem(Enum.at(:ets.lookup(:user_table, "#{user_who_wants_to_follow}"),0),4)
 
-          IO.puts user_to_follow <> " Following list before"
-          IO.inspect followingList_toFollow
-          IO.puts user_to_follow <> " Following list after"
+          # IO.puts user_to_follow <> " Following list before"
+          # IO.inspect followingList_toFollow
+          # IO.puts user_to_follow <> " Following list after"
           if not empty? followingList_toFollow do
             final_followingList_to_follow = Enum.at(Enum.at(followingList_toFollow,0),0)
           end
-          IO.inspect final_followingList_to_follow
+          # IO.inspect final_followingList_to_follow
 
 
-          # newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
-          IO.puts user_to_follow <> " Follower list before"
-          IO.inspect followersList_toFollow
-          IO.puts user_to_follow <> " Follower list after"
+          newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
+          # IO.puts user_to_follow <> " Follower list before"
+          # IO.inspect followersList_toFollow
+          # IO.puts user_to_follow <> " Follower list after"
           if not empty? followersList_toFollow do
             final_followersList_to_follow =  Enum.at(Enum.at(followersList_toFollow,0),0)
             if not Enum.member?(final_followersList_to_follow, user_who_wants_to_follow) do
@@ -417,20 +398,20 @@ def populatelists(iter, list, hashtag_list, mention_list) do
               :ets.insert(:user_table, {"#{user_to_follow}", "password", final_followingList_to_follow, final_followersList_to_follow, mentionList_toFollow})
             end
           end
-          IO.inspect final_followersList_to_follow
+          # IO.inspect final_followersList_to_follow
 
 
-          IO.puts user_who_wants_to_follow<>" Follower list before"
-          IO.inspect followersList_user_who_wants_to_follow
-          IO.puts user_who_wants_to_follow<>" Follower list after"
+          # IO.puts user_who_wants_to_follow<>" Follower list before"
+          # IO.inspect followersList_user_who_wants_to_follow
+          # IO.puts user_who_wants_to_follow<>" Follower list after"
           if not empty? followersList_user_who_wants_to_follow do
             final_followersList_user_who_wants_to_follow = Enum.at(Enum.at(followersList_user_who_wants_to_follow,0),0)
           end
-          IO.inspect final_followersList_user_who_wants_to_follow
+          # IO.inspect final_followersList_user_who_wants_to_follow
 
-          IO.puts user_who_wants_to_follow<>" Following list before"
-          IO.inspect followingList_user_who_wants_to_follow
-          IO.puts user_who_wants_to_follow<>" Following list after"
+          # IO.puts user_who_wants_to_follow<>" Following list before"
+          # IO.inspect followingList_user_who_wants_to_follow
+          # IO.puts user_who_wants_to_follow<>" Following list after"
           if not empty? followingList_user_who_wants_to_follow do
             final_followingList_user_who_wants_to_follow = Enum.at(Enum.at(followingList_user_who_wants_to_follow,0),0)
             if not Enum.member?(final_followingList_user_who_wants_to_follow, user_to_follow) do
@@ -438,19 +419,7 @@ def populatelists(iter, list, hashtag_list, mention_list) do
               :ets.insert(:user_table, {"#{user_who_wants_to_follow}", "password", final_followingList_user_who_wants_to_follow, final_followersList_user_who_wants_to_follow, mentionList_user_who_wants_to_follow})
             end
           end
-          IO.inspect final_followingList_user_who_wants_to_follow
-
-          # if not empty? mentionList_user_who_wants_to_follow do
-          #   final_mentionList_user_who_wants_to_follow = Enum.at(Enum.at(mentionList_user_who_wants_to_follow,0),0)
-          
-          # end
-
-          # if not empty? mentionList_toFollow do
-          #   final_mentionList_toFollow = Enum.at(Enum.at(mentionList_toFollow,0),0)
-          # end
-
-          
-          
+          # IO.inspect final_followingList_user_who_wants_to_follow
 
   end
 end

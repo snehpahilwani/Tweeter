@@ -6,7 +6,8 @@ defmodule Client do
         send(server, {:imlive, userName})
         receive do
             {:feed, feeddata} ->
-                IO.inspect feeddata
+                # IO.puts "The feed data is:"
+                # IO.inspect feeddata
                 doActivities(iter, numNodes, userName)
         end
 
@@ -18,7 +19,7 @@ defmodule Client do
 
         action_list = ["tweet",  "query","follow",  "retweet"] #
         # user_list = ["user1", "user2", "user3", "user4", "user5"]
-        hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
+        hashtag_list = ["love", "yolo", "lol", "lmao", "rofl"]
         query_list = ["hashtag", "mention"]
         tweet_type_list = [1,2,3,4]
 
@@ -39,7 +40,7 @@ defmodule Client do
         after 0_200 ->
             # do random activities
             if iter < 1 do
-                IO.puts "Iterations done!"
+                IO.puts "Logging off!"
                 send(server, {:logoff, userName})
             else
                 action_atom = Enum.random(action_list)
@@ -59,7 +60,7 @@ defmodule Client do
                                 send(server, {:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randUser]),retweetID})
                         end 
                     action_atom == "follow" ->
-                        IO.puts "follow"
+                        # IO.puts "follow"
                         user_to_follow = randUser
                         send(server, {:follow, user_to_follow, "user"<>"#{userName}"})
                     action_atom == "query" ->
