@@ -11,13 +11,8 @@ defmodule Project4 do
             #:ets.new(:user_mentions, [:set, :protected, :named_table])
             userList = Enum.to_list(1..numNodes)
             newuserList = Enum.map(userList, fn(x)->Enum.join(["user",x]) end)
+            IO.puts "Creating "<>"#{numNodes}"<>" Users and their followers according to Zipf distribution"
             getZipfDist(length(newuserList), newuserList)
-            IO.puts "User table values check"
-            IO.inspect :ets.lookup(:user_table, "user1")
-            IO.inspect :ets.lookup(:user_table, "user2")
-            IO.inspect :ets.lookup(:user_table, "user3")
-            IO.inspect :ets.lookup(:user_table, "user4")
-            IO.inspect :ets.lookup(:user_table, "user5")
             #Start creating users for simulation
             createUsers(numNodes)
             # IO.inspect :ets.match(:user_table, {:"user2", :"$1", :"_",:"_"})
@@ -31,8 +26,11 @@ defmodule Project4 do
 
             numbers = 1..numNodes
             wholeList = Enum.to_list(numbers)
+            IO.puts "Finished creating "<>"#{numNodes}"<>" users in DB"
+            IO.puts "Starting "<>"#{numLive}"<>" live users"
             {passiveList,liveNodeMap} = goLive(numNodes,numLive,wholeList,liveNodeMap)
 
+            # time_1 = System.system_time(:millisecond)
             serve(0,numNodes,liveNodeMap,passiveList)
 
 
@@ -58,14 +56,11 @@ defmodule Project4 do
     else
       user = "user"<>"#{num_user}"
       pass = "password"
-      # following = ["user1","user2","user3","user4"]
-      # followers = ["user1","user2","user3","user4"] 
       followers = elem(Enum.at(:ets.lookup(:user_table, user),0),3)
       mentions = []
       Enum.each followers, fn follower ->
         follow(user, follower)
       end
-      IO.puts "Came out of loop"
       IO.inspect :ets.lookup(:user_table, user)
       #follow(user_to_follow, user_who_wants_to_follow)
       #:ets.insert_new(:user_table, {user, pass, following, followers, mentions})
@@ -122,6 +117,8 @@ defmodule Project4 do
   end
 
   def serve(tweetid,numNodes,liveNodeMap,passiveList) do
+    IO.puts "Tweet Count"
+    IO.inspect tweetid
     receive do
       {:tweet, userName, tweetContent,retweetID} ->
         IO.puts tweetContent
@@ -197,7 +194,10 @@ defmodule Project4 do
             usertosend = :global.whereis_name(user_atom)
             IO.puts "Query List After Returned: "
             IO.inspect queryList
-            send(usertosend, {:queryResult, queryList})
+            if usertosend != :undefined do
+              send(usertosend, {:queryResult, queryList})
+            end
+            
           #end
       
       {:imlive, userName} ->
@@ -306,7 +306,10 @@ defmodule Project4 do
           IO.puts "Sending to user"
           IO.inspect follower
           fol = :global.whereis_name(String.to_atom(follower))
-          send(fol, {:liveTweet,"user"<>"#{userName}", tweetContent})
+          if fol != :undefined do
+            send(fol, {:liveTweet,"user"<>"#{userName}", tweetContent})
+          end
+          
         end
       end
     end
