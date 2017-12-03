@@ -10,28 +10,37 @@ defmodule Client do
                 doActivities(iter, numNodes, userName)
         end
 
-        Process.sleep(:infinity)
+        # Process.sleep(:infinity)
     end
 
     def doActivities(iter, numNodes, userName) do
         server = :global.whereis_name(:server)
 
-        action_list = ["tweet", "follow", "query", "retweet"]
-        user_list = ["user1", "user2", "user3", "user4", "user5"]
+        action_list = ["tweet",  "query","follow",  "retweet"] #
+        # user_list = ["user1", "user2", "user3", "user4", "user5"]
         hashtag_list = ["mofo", "yolo", "lol", "lmao", "rofl"]
         query_list = ["hashtag", "mention"]
         tweet_type_list = [1,2,3,4]
+
+        numbers = 1..numNodes
+        wholeList = Enum.to_list(numbers)
+        selectedRandomUser = Enum.random(wholeList)
+        randUser = "user"<>"#{selectedRandomUser}"
 
         receive do
             {:liveTweet, userWhoTweeted,  tweetdata} ->
                 IO.puts "New live feed from "<>"#{userWhoTweeted}"<>": "
                 IO.inspect tweetdata
                 doActivities(iter, numNodes, userName)
+            {:queryResult, list} ->
+                IO.puts "The query result is:"
+                IO.inspect list
+                doActivities(iter, numNodes, userName)
         after 0_200 ->
             # do random activities
             if iter < 1 do
                 IO.puts "Iterations done!"
-                send(server, {:logoff, numNodes, userName})
+                send(server, {:logoff, userName})
             else
                 action_atom = Enum.random(action_list)
                 cond do
@@ -45,13 +54,13 @@ defmodule Client do
                             tweet_type == 2 ->
                                 send(server,{:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list)]), retweetID})
                             tweet_type == 3 ->
-                                send(server, {:tweet,userName, Enum.join([tweet, ' @', Enum.random(user_list)]),retweetID})
+                                send(server, {:tweet,userName, Enum.join([tweet, ' @', randUser]),retweetID})
                             tweet_type == 4 ->
-                                send(server, {:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',Enum.random(user_list)]),retweetID})
+                                send(server, {:tweet,userName, Enum.join([tweet,' #', Enum.random(hashtag_list), ' @',randUser]),retweetID})
                         end 
                     action_atom == "follow" ->
                         IO.puts "follow"
-                        user_to_follow = Enum.random(user_list)
+                        user_to_follow = randUser
                         send(server, {:follow, user_to_follow, "user"<>"#{userName}"})
                     action_atom == "query" ->
                         query = Enum.random(query_list)
@@ -61,7 +70,7 @@ defmodule Client do
                                 
                                 send(server, {:query, userName, Enum.join(["#",hashtag])})
                             query == "mention" ->
-                                mention = Enum.random(user_list)
+                                mention = randUser
                                 
                                 send(server, {:query, userName, Enum.join(["@",mention])})
                         end

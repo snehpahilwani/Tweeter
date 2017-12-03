@@ -23,9 +23,9 @@ defmodule Project4 do
 
             numbers = 1..numNodes
             wholeList = Enum.to_list(numbers)
-            liveNodeMap = goLive(numNodes,numLive,wholeList,liveNodeMap)
+            {passiveList,liveNodeMap} = goLive(numNodes,numLive,wholeList,liveNodeMap)
 
-            serve(0,liveNodeMap)
+            serve(0,numNodes,liveNodeMap,passiveList)
 
 
 
@@ -58,27 +58,42 @@ defmodule Project4 do
     end
   end   
 
-  def goLive(numNodes,numLive,wholeList,liveNodeMap) do
+  def goLive(numNodes,numLive,passiveList,liveNodeMap) do
 
     if numLive <= 0 do
       #do nothing
-      liveNodeMap
+      {passiveList,liveNodeMap}
     else
-      selectedRandomUser = Enum.random(wholeList)
+      selectedRandomUser = Enum.random(passiveList)
 
       user = "user"<>"#{selectedRandomUser}"
-      if Map.has_key?(liveNodeMap, user) do
-        selectedRandomUser = Enum.random(wholeList)
-        goLive(numNodes,numLive,wholeList,liveNodeMap)
+      user_atom = String.to_atom(user)
+      if Map.has_key?(liveNodeMap, user_atom) do
+        IO.puts "The passive list is:"
+        IO.inspect passiveList
+        IO.puts "The liveNodemap is:"
+        IO.inspect liveNodeMap
+        selectedRandomUser = Enum.random(passiveList)
+        goLive(numNodes,numLive,passiveList,liveNodeMap)
       else
-        Map.put_new(liveNodeMap, user, 1)
+        IO.puts "The passive list is:"
+        IO.inspect passiveList
+        IO.puts "The liveNodemap is:"
+        IO.inspect liveNodeMap
+        IO.inspect Map.keys(liveNodeMap)
+
+        user_atom = String.to_atom(user)
+        liveNodeMap = Map.put_new(liveNodeMap, user_atom, 1)
+        if Map.has_key?(liveNodeMap, user_atom) do
+          IO.puts "Working livemap"
+        end
         node_pid = spawn(Client, :communicate, [10, numNodes, selectedRandomUser])
         user_atom = String.to_atom(user)
         IO.puts user_atom
         :global.register_name(user_atom, node_pid)
         :global.sync()
-
-        goLive(numNodes,numLive-1,wholeList -- [selectedRandomUser],liveNodeMap)
+        passiveList = passiveList -- [selectedRandomUser]
+        goLive(numNodes,numLive-1,passiveList,liveNodeMap)
       end
     end
   end   
@@ -89,7 +104,7 @@ defmodule Project4 do
       false
   end
 
-  def serve(tweetid,liveNodeMap) do
+  def serve(tweetid,numNodes,liveNodeMap,passiveList) do
     receive do
       {:tweet, userName, tweetContent,retweetID} ->
         IO.puts tweetContent
@@ -97,13 +112,12 @@ defmodule Project4 do
         tweetAPI(tweetid,userName, tweetContent,retweetID,liveNodeMap)
         #message all followers about the tweet
         
-      {:logoff, numNodes, userName} ->
-        userName = Enum.join(["user", userName])
-        IO.puts Enum.join(["Logging off: ", userName])
-        liveNodeMap = Map.delete(liveNodeMap, userName)
-        numbers = 1..numNodes
-        wholeList = Enum.to_list(numbers)
-        goLive(numNodes,1,wholeList,liveNodeMap)
+      {:logoff, user} ->
+        user_atom = String.to_atom("user"<>"#{user}")
+        IO.puts Enum.join(["Logging off: ", "user"<>"#{user}"])
+        liveNodeMap = Map.delete(liveNodeMap, user_atom)
+        passiveList = passiveList ++ [user]
+        goLive(numNodes,1,passiveList,liveNodeMap)
       
 
       {:follow, user_to_follow, user_following} ->
@@ -202,12 +216,8 @@ defmodule Project4 do
               mention_row = Enum.at(:ets.lookup(:user_table, hashOrMention),0)
               if mention_row != nil do
                 tweet_ids = elem(mention_row,4)
-                Enum.each tweet_ids, fn tweet_id ->
-                  tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
-                  IO.puts "Tweet Content after Mention: "
-                  IO.inspect tweetContent
-                  queryList = queryList ++ [tweetContent]
-                end  
+                queryList = buildList(tweet_ids,queryList,length(tweet_ids)-1)
+                
               end
               # IO.puts "Query List before"
               # IO.inspect queryList
@@ -218,12 +228,14 @@ defmodule Project4 do
               hashtag_row = Enum.at(:ets.lookup(:hashtags, hashOrMention),0)
               if hashtag_row != nil do
                 tweet_ids = elem(hashtag_row,1)
-                Enum.each tweet_ids, fn tweet_id ->
-                  tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
-                  IO.puts "Tweet Content after Hashtag: "
-                  IO.inspect tweetContent
-                  queryList = queryList ++ [tweetContent]
-                end  
+                queryList = buildList(tweet_ids,queryList,length(tweet_ids)-1)
+                # Enum.each tweet_ids, fn tweet_id ->
+                #   tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
+                #   IO.puts "Tweet Content after Hashtag: "
+                #   IO.inspect tweetContent
+                #   queryList = queryList ++ [tweetContent]
+                #   IO.inspect queryList
+                # end  
               end
               # IO.puts "Query List before"
               # IO.inspect queryList
@@ -234,7 +246,7 @@ defmodule Project4 do
             usertosend = :global.whereis_name(user_atom)
             IO.puts "Query List After Returned: "
             IO.inspect queryList
-            send(usertosend, {:feed, queryList})
+            send(usertosend, {:queryResult, queryList})
           #end
       
       {:imlive, userName} ->
@@ -244,10 +256,34 @@ defmodule Project4 do
           usertosend = :global.whereis_name(user_atom)
           feedList = feedData(userName)
           IO.inspect feedList
+          IO.inspect liveNodeMap
+          IO.inspect passiveList
           send(usertosend, {:feed, feedList} )
     end
-    serve(tweetid,liveNodeMap)
+    serve(tweetid,numNodes,liveNodeMap,passiveList)
   end
+
+
+  def buildList(tweet_ids,list,index) do
+    IO.puts "Entered build list"
+    if index < 0 do
+      list
+    else
+      tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, Enum.at(tweet_ids,index)),0),2)
+      IO.puts "Tweet Content after Mention: "
+      IO.inspect tweetContent
+      list = list ++ [tweetContent]
+      buildList(tweet_ids,list,index-1)
+    end
+
+    # Enum.each tweet_ids, fn tweet_id ->
+    #   tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, tweet_id),0),2)
+    #   IO.puts "Tweet Content after Mention: "
+    #   IO.inspect tweetContent
+    #   queryList = queryList ++ [tweetContent]
+    # end  
+  end
+
 
   def empty?([]), do: true
   def empty?(list) when is_list(list) do
@@ -309,26 +345,34 @@ defmodule Project4 do
 
     if not empty? followersList do
       Enum.each Enum.at(Enum.at(followersList,0),0), fn follower -> 
+        IO.puts "live tweet"
         # IO.inspect follower
         #check if follower is live. If live send live tweet.
-        if Map.has_key?(liveNodeMap, follower) do
+        # IO.inspect liveNodeMap
+
+        follower_atom = String.to_atom(follower)
+        if Map.has_key?(liveNodeMap, follower_atom) do
+          IO.puts "Sending to user"
+          IO.inspect follower
           fol = :global.whereis_name(String.to_atom(follower))
-          send(fol, {:liveTweet,fol, tweetContent})
+          send(fol, {:liveTweet,"user"<>"#{userName}", tweetContent})
         end
       end
     end
   end
 
-    def feedData(userName) do
-      followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_", :"_"})
-      IO.inspect followingList
+  def feedData(userName) do
+    followingList = :ets.match(:user_table, { "user"<>"#{userName}", :"_", :"$1", :"_", :"_"})
+    IO.inspect followingList
 
-      #Enum.at(followingList,0)
-      feedList = []
+    #Enum.at(followingList,0)
+    feedList = []
+    if not empty? followingList do
       Enum.each Enum.at(Enum.at(followingList,0),0), fn following -> 
           feedList = feedList ++ :ets.match(:tweets_table, {:"$1", "user"<>"#{following}",:"$2", :"_", :"$3"})  
       end
-      feedList
+    end
+    feedList
   end
 
 
@@ -358,7 +402,7 @@ def populatelists(iter, list, hashtag_list, mention_list) do
           first_letter == "@" ->
               mention_list = mention_list ++ [word]
           true ->
-              IO.puts "Do nothing"
+              # IO.puts "Do nothing"
       end
     list = List.delete(list, word)
     populatelists(iter-1, list, hashtag_list, mention_list)
