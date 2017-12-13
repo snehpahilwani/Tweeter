@@ -54,13 +54,42 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
-let channel           = socket.channel("server:twtr", {})
-let chatInput         = document.querySelector("#chat-input")
-let messagesContainer = document.querySelector("#messages")
+let channel = socket.channel("server:twtr", {})
+// let chatInput         = document.querySelector("#chat-input")
+// let messagesContainer = document.querySelector("#messages")
 
 channel.join()
 .receive("ok", resp => { console.log("Joined successfully", resp) })
 .receive("error", resp => { console.log("Unable to join", resp) })
+
+document.getElementById("btn_login").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var pass = document.querySelector("#txt_pass").value
+  channel.push("login", {userName: userName, pass: pass})
+
+});
+
+document.getElementById("btn_tweet").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var tweet = document.querySelector("#txt_tweet").value
+  channel.push("tweet", {userName: userName, tweet: tweet})
+
+});
+
+document.getElementById("btn_retweet").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var retweetID = document.querySelector("#txt_retweet").value
+  channel.push("retweet", {userName: userName, retweetID: retweetID})
+});
+
+document.getElementById("btn_follow").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var user_to_follow = document.querySelector("#txt_follow").value
+  channel.push("retweet", {userName: userName, user_to_follow: user_to_follow})
+});
+
+
+
 
 
 
