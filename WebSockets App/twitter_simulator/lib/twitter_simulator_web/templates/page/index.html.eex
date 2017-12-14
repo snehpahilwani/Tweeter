@@ -1,6 +1,19 @@
 <div class="jumbotron">
   <h2><%= gettext "Welcome to %{name}!", name: "Tweeter" %></h2>
-  <p class="lead">A twitter clone built in Elixir/Phoenix.</p>
+  <p class="lead">
+        <div id="messages">
+<center>UserName: <input id="txt_userName" type="text"></input></br></br></center>
+<center>Password: <input id="txt_pass" type="password"></input></br></br></center>
+
+<center><button id="btn_login">Login</button>
+<button id="btn_signup">Signup</button>
+
+</div>
+
+  </p>
+
+
+
 </div>
 <%# 
 <div class="row marketing">
@@ -33,15 +46,3 @@
       </li>
     </ul>
   </div> %>
-      <div id="messages"></div>
-<center>UserName: <input id="txt_userName" type="text"></input></br></br></center>
-<center>Password: <input id="txt_pass"></input></br></br></center>
-<center>Tweet: <input id="txt_tweet"></input></br></br></center>
-<center>ReTweet: <input id="txt_retweet"></input></br></br></center>
-<center>Follow: <input id="txt_follow"></input></br></br></center>
-<center><button id="btn_login">Login</button>
-<button id="btn_tweet">Tweet</button>
-
-<button id="btn_retweet">ReTweet</button>
-<button id="btn_follow">Follow</button></center>
-</div>

@@ -55,6 +55,7 @@ socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
 let channel = socket.channel("server:twtr", {})
+
 // let chatInput         = document.querySelector("#chat-input")
 // let messagesContainer = document.querySelector("#messages")
 
@@ -69,6 +70,14 @@ document.getElementById("btn_login").addEventListener('click', function(){
 
 });
 
+document.getElementById("btn_signup").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var pass = document.querySelector("#txt_pass").value
+  channel.push("signup", {userName: userName, pass: pass})
+
+});
+
+
 document.getElementById("btn_tweet").addEventListener('click', function(){
   var userName = document.querySelector("#txt_userName").value
   var tweet = document.querySelector("#txt_tweet").value
@@ -78,21 +87,42 @@ document.getElementById("btn_tweet").addEventListener('click', function(){
 
 document.getElementById("btn_retweet").addEventListener('click', function(){
   var userName = document.querySelector("#txt_userName").value
-  var retweetID = document.querySelector("#txt_retweet").value
+  var retweetID = parseInt(document.querySelector("#txt_retweet").value)
   channel.push("retweet", {userName: userName, retweetID: retweetID})
 });
 
 document.getElementById("btn_follow").addEventListener('click', function(){
   var userName = document.querySelector("#txt_userName").value
   var user_to_follow = document.querySelector("#txt_follow").value
-  channel.push("retweet", {userName: userName, user_to_follow: user_to_follow})
+  channel.push("follow", {userName: userName, user_to_follow: user_to_follow})
+});
+
+document.getElementById("btn_query").addEventListener('click', function(){
+  var userName = document.querySelector("#txt_userName").value
+  var hashOrMention = document.querySelector("#txt_query").value
+  channel.push("query", {userName: userName, hashOrMention: hashOrMention})
 });
 
 
 
+channel.on("login_success", payload => {
+  alert(`${payload.body}`)
+})
 
 
+channel.on("login_failure", payload => {
+  alert(`${payload.body}`)
+})
 
+
+channel.on("signup_success", payload => {
+  alert(`${payload.body}`)
+})
+
+
+channel.on("signup_failure", payload => {
+  alert(`${payload.body}`)
+})
 // chatInput.addEventListener("keypress", event => {
 //   if(event.keyCode === 13){
 //     channel.push("new_msg", {body: chatInput.value})

@@ -1,0 +1,13 @@
+
+<div class="jumbotron">
+<center>Tweet: <input id="txt_tweet"></input></br></br></center>
+<center>ReTweet: <input id="txt_retweet"></input></br></br></center>
+<center>Follow: <input id="txt_follow"></input></br></br></center>
+<center>Query: <input id="txt_query"></input></br></br></center>
+<center><button id="btn_tweet">Tweet</button>
+
+<button id="btn_retweet">ReTweet</button>
+<button id="btn_query">Query</button>
+
+<button id="btn_follow">Follow</button></center>
+</div>
