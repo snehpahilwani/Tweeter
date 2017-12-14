@@ -69,7 +69,8 @@
     end
 
     def handle_in("follow", %{"userName" => userName, "user_to_follow" => user_to_follow}, socket) do
-        Server.follow(user_to_follow, userName)
+        status = Server.follow(user_to_follow, userName)
+        push socket, "follow_status", %{status: status}
         {:noreply, socket}
     end
 

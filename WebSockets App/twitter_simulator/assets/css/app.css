@@ -33,9 +33,13 @@
     width: 50%;
     overflow: scroll;
     background-color: #FFFFFF;
+    text-align: left;
+    margin-right: 5px;
+    margin-left: 5px; 
+    margin-top: 5px;
 }
 
-#container {overflow:hidden; background:#0f0;    width:100%; clear:both;background-color:green; repeat-y 0% 0%; border:thin #CCCCCC solid}
+#container {overflow:hidden; background:#0f0;  margin-left: 5px;   width:100%; clear:both;background-color:green; repeat-y: 0%; border:thin #CCCCCC solid}
 #colleft {float:left; width:50%;}
     #collright {float:left;  width:50%;}
     

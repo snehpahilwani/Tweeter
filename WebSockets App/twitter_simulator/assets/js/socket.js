@@ -139,6 +139,10 @@ channel.on("login_success", payload => {
   window.location.href = "http://localhost:4000/user/" + `${payload.userName}`
 })
 
+channel.on("follow_status", payload => {
+  alert(`${payload.status}`)
+})
+
 
 channel.on("login_failure", payload => {
   alert(`${payload.body}`)
@@ -164,7 +168,7 @@ channel.on("queryList", payload => {
   // var queries = `${payload.queryList}`;
   for(var i = 0; i< queries.length; i++){
     console.log(`${payload.queryList[i].desc}`);
-    divlist.prepend(`${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
+    divlist.prepend(`${payload.queryList[i].tweetID} -- ${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
   }
   divlist.scrollTop;
   //console.log(payload)
@@ -180,7 +184,7 @@ channel.on("updateFeed", payload => {
   // var queries = `${payload.queryList}`;
   for(var i = 0; i< queries.length; i++){
     console.log(`${payload.queryList[i].desc}`);
-    divlist.prepend(`${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
+    divlist.prepend(`${payload.queryList[i].tweetID} -- ${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
   }
   divlist.scrollTop;
   //console.log(payload)
@@ -196,7 +200,7 @@ channel.on("getTweet", payload => {
   // alert(`${payload.queryList[0]}`)
   // var queries = `${payload.queryList}`;
 
-  divlist.prepend(`${payload.tweet.userName}: ${payload.tweet.desc} <br>`);
+  divlist.prepend(`${payload.tweet.tweetID} -- ${payload.tweet.userName}: ${payload.tweet.desc} <br>`);
   
   divlist.scrollTop;
   //console.log(payload)

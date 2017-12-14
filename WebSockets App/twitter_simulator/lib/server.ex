@@ -202,9 +202,10 @@ defmodule Server do
     else
       #tweetContent = elem(Enum.at(:ets.lookup(:tweets_table, Enum.at(tweet_ids,index)),0),2)
       tweetContent = get("tweets_table", Enum.at(tweet_ids,index), 2)
+      tweetID = get("tweets_table", Enum.at(tweet_ids,index), 0)
       userName = get("tweets_table", Enum.at(tweet_ids,index), 1)
       #list = list ++ [tweetContent]
-      list = list ++ [%{desc: tweetContent, userName: userName}]
+      list = list ++ [%{desc: tweetContent, userName: userName, tweetID: tweetID}]
       buildList(tweet_ids,list,index-1)
     end
 
@@ -308,6 +309,11 @@ def populatelists(iter, list, hashtag_list, mention_list) do
     # IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
     # IO.puts "User to follow: "<>user_to_follow
     # IO.puts "User who wants to follow: "<>user_who_wants_to_follow
+    status = "followed"
+    if get("user_table", user_to_follow, 0) == [] do
+      status = "invalid user"
+    else
+
     followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
     followersList_user_who_wants_to_follow = :ets.match(:user_table, { "#{user_who_wants_to_follow}", :"_", :"_", :"$1", :"_"})
 
@@ -369,6 +375,8 @@ def populatelists(iter, list, hashtag_list, mention_list) do
     IO.inspect :ets.lookup(:user_table, "#{user_who_wants_to_follow}")
     IO.inspect :ets.lookup(:user_table, "#{user_to_follow}")
     # IO.inspect final_followingList_user_who_wants_to_follow
+    end
+    status
   end
 
   
