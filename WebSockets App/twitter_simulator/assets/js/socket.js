@@ -63,50 +63,77 @@ channel.join()
 .receive("ok", resp => { console.log("Joined successfully", resp) })
 .receive("error", resp => { console.log("Unable to join", resp) })
 
-document.getElementById("btn_login").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var pass = document.querySelector("#txt_pass").value
-  channel.push("login", {userName: userName, pass: pass})
+if(document.getElementById("btn_login")){
+  let userName = document.querySelector("#txt_userName")
+  let pass = document.querySelector("#txt_pass")
+  document.getElementById("btn_login").onclick = function(){
+  channel.push("login", {userName: userName.value, pass: pass.value})
+};
+}
 
+if(document.getElementById("btn_signup")){
+  let userName = document.querySelector("#txt_userName")
+  let pass = document.querySelector("#txt_pass")
+  console.log(userName)
+  console.log(pass)
+  document.getElementById("btn_signup").onclick = function(){
+  channel.push("signup", {userName: userName.value, pass: pass.value})
+};
+}
+
+if(document.getElementById("btn_tweet")){
+  //let userName = document.querySelector("#txt_userName")
+  let tweet = document.querySelector("#txt_tweet")
+  let link = window.location.href
+  let userName = link.split("/")[link.split("/").length-1]
+  document.getElementById("btn_tweet").onclick = function(){
+    channel.push("tweet", {userName: userName, tweet: tweet.value})
+};
+}
+
+if(document.getElementById("btn_retweet")){
+  let link = window.location.href
+  let userName = link.split("/")[link.split("/").length-1]
+  let retweetID = document.querySelector("#txt_retweet")
+  document.getElementById("btn_retweet").onclick = function(){
+    channel.push("retweet", {userName: userName, retweetID: parseInt(retweetID.value)})
+};
+}
+
+
+if(document.getElementById("btn_follow")){
+  let link = window.location.href
+  let userName = link.split("/")[link.split("/").length-1]
+  let user_to_follow = document.querySelector("#txt_follow")
+  document.getElementById("btn_follow").onclick = function(){
+    channel.push("follow", {userName: userName, user_to_follow: user_to_follow.value})
+};
+}
+
+
+if(document.getElementById("btn_query")){
+  let link = window.location.href
+  let userName = link.split("/")[link.split("/").length-1]
+  let hashOrMention = document.querySelector("#txt_query")
+  document.getElementById("btn_query").onclick = function(){
+    channel.push("query", {userName: userName, hashOrMention: hashOrMention.value})
+};
+}
+
+$(document).ready(function() {
+  let link = window.location.href
+  let length = link.split("/").length
+  if(length>1){
+    let userName = link.split("/")[link.split("/").length-1]
+    channel.push('updateSocket', {userName: userName});
+    channel.push('updateFeed', {userName: userName});
+  }
+  
 });
-
-document.getElementById("btn_signup").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var pass = document.querySelector("#txt_pass").value
-  channel.push("signup", {userName: userName, pass: pass})
-
-});
-
-
-document.getElementById("btn_tweet").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var tweet = document.querySelector("#txt_tweet").value
-  channel.push("tweet", {userName: userName, tweet: tweet})
-
-});
-
-document.getElementById("btn_retweet").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var retweetID = parseInt(document.querySelector("#txt_retweet").value)
-  channel.push("retweet", {userName: userName, retweetID: retweetID})
-});
-
-document.getElementById("btn_follow").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var user_to_follow = document.querySelector("#txt_follow").value
-  channel.push("follow", {userName: userName, user_to_follow: user_to_follow})
-});
-
-document.getElementById("btn_query").addEventListener('click', function(){
-  var userName = document.querySelector("#txt_userName").value
-  var hashOrMention = document.querySelector("#txt_query").value
-  channel.push("query", {userName: userName, hashOrMention: hashOrMention})
-});
-
-
 
 channel.on("login_success", payload => {
   alert(`${payload.body}`)
+  window.location.href = "http://localhost:4000/user/" + `${payload.userName}`
 })
 
 

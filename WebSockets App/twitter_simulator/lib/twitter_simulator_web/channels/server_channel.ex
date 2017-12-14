@@ -19,7 +19,8 @@
 
     def handle_in("login", %{"userName" => userName, "pass" => pass}, socket) do
       if Server.login(userName, pass) do
-          push socket, "login_success", %{body: "Welcome back to Tweeter!"}
+          push socket, "login_success", %{body: "Welcome back to Tweeter!", userName: userName}
+          
       else
           push socket, "login_failure", %{body: "Wrong username/password combination"}
       end

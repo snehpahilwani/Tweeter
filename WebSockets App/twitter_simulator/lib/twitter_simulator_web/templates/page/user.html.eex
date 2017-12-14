@@ -1,13 +1,22 @@
-
 <div class="jumbotron">
+<div id="container">
+<div id="colleft">
+<div id="feed">
+Humma
+</div>
+</div>
+<div id="collright">
 <center>Tweet: <input id="txt_tweet"></input></br></br></center>
 <center>ReTweet: <input id="txt_retweet"></input></br></br></center>
 <center>Follow: <input id="txt_follow"></input></br></br></center>
 <center>Query: <input id="txt_query"></input></br></br></center>
 <center><button id="btn_tweet">Tweet</button>
-
 <button id="btn_retweet">ReTweet</button>
 <button id="btn_query">Query</button>
-
 <button id="btn_follow">Follow</button></center>
+
+<p>Creating equal height columns is all in how you set up the background image. We need our background image to as wide as the 2 columns</p>
+<p>So, we'll make the background image 600 pixels wide - 300px each side. Open up your image editor and create a new document that is 600 pixels wide by 5 pixels tall. </p>
+</div>
+</div>
 </div>

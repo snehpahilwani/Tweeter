@@ -50,6 +50,7 @@ defmodule TwitterSimulatorWeb.Endpoint do
       :ets.new(:user_table, [:set, :public, :named_table])   
       :ets.new(:tweets_table, [:set, :public, :named_table])
       :ets.new(:hashtags, [:set, :public, :named_table])
+      :ets.new(:sockets, [:set, :public, :named_table])
 
     if config[:load_from_system_env] do
       port = System.get_env("PORT") || raise "expected the PORT environment variable to be set"

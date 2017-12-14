@@ -1,1 +1,43 @@
 /* This file is for your main application css. */
+
+
+#content1 {
+	float: left;
+	width: 25%;
+	background-color: #DDD;
+}
+#content2 {
+	float: left;
+	width: 75%;
+	background-color: #CCC;
+}
+
+#logo {
+    float: left;
+    height: 25%;
+    
+}
+
+#query {
+    float: left;
+    height: 35%;
+    background-color: #FFFFFF;
+}
+
+#search{
+    float: left;
+    height: 10%;
+    background-color: #FFFFFF;
+
+}
+
+#feed{
+    float: left;
+    height: 90%;
+    background-color: #FFFFFF;
+}
+
+#container {overflow:hidden; background:#0f0;    width:100%; clear:both;background-color:green; repeat-y 0% 0%; border:thin #CCCCCC solid}
+#colleft {float:left; width:50%;}
+    #collright {float:left;  width:50%;}
+    
