@@ -9,26 +9,27 @@
  
 
 /* Space out content a bit */
-body, form, ul, table {
+/*body, form, ul, table {
   margin-top: 20px;
   margin-bottom: 20px;
-}
+}*/
 
 /* Phoenix flash messages */
-.alert:empty { display: none; }
+/*.alert:empty { display: none; }*/
 
 /* Custom page header */
-.header {
+/*.header {
   border-bottom: 1px solid #e5e5e5;
-}
-.logo {
+}*/
+/* .logo {
   width: 520px;
-  height: 200px;
-  display: inline-block;
+  height: 250px;
+  display: block;
+  margin:auto;
   margin-bottom: 1em;
   background-image: url("/images/phoenix.png");
-  background-size: 520px 200px;
-}
+  background-size: 520px 250px;
+} */
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
 .header,
@@ -38,11 +39,11 @@ body, form, ul, table {
 }
 
 /* Customize container */
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .container {
     max-width: 730px;
   }
-}
+} */
 .container-narrow > hr {
   margin: 30px 0;
 }

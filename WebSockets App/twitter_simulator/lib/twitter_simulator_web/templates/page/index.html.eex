@@ -1,20 +1,20 @@
-<div class="jumbotron">
-  <h2><%= gettext "Welcome to %{name}!", name: "Tweeter" %></h2>
-  <p class="lead">
-        <div id="messages">
-<center>UserName: <input id="txt_userName" type="text"></input></br></br></center>
-<center>Password: <input id="txt_pass" type="password"></input></br></br></center>
+  <center><div class = "container4">
+  <logo>
+ <h2><%= gettext "Welcome to %{name}!", name: "Tweeter" %></h2>
+    <p>
+  <input id="txt_userName" type="text" placeholder="username" ></input></br></br>
+  <input id="txt_pass" type="password" placeholder="password" ></input></br></br>
 
-<center><button id="btn_login">Login</button>
-<button id="btn_signup">Signup</button>
-
-</div>
-
-  </p>
+  <button class="firstpage" id="btn_login">Login</button></br></br>
+  <button class="firstpage" id="btn_signup">Signup</button>
 
 
 
-</div>
+    </p>
+
+
+
+  </div></center>
 <%# 
 <div class="row marketing">
   <div class="col-lg-6">

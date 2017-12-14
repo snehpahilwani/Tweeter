@@ -1,5 +1,72 @@
 /* This file is for your main application css. */
+@import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
+div.container4 {
+    position: relative;
+    z-index: 1;
+    background: rgb(102, 165, 228);
+    max-width: 360px;
+    margin: 0 auto 100px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}    
+
+input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+ 
+.secondpage_input{
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+} 
+
+h2{
+    font-family: "Roboto", sans-serif;
+    color: #FFFFFF;
+}
+
+button.firstpage {
+        font-family: "Roboto", sans-serif;
+        text-transform: uppercase;
+        outline: 0;
+        background: #4CAF50;
+        width: 100%;
+        border: 0;
+        padding: 15px;
+        color: #FFFFFF;
+        font-size: 14px;
+        -webkit-transition: all 0.3 ease;
+        transition: all 0.3 ease;
+        cursor: pointer;   
+}
+
+.form button:hover,.form button:active,.form button:focus {
+    background: #43A047;
+}
+    /* position: relative ;
+    width: 30%;
+padding: 20px;
+    background: yellow; */
+
+ div.container4 p {
+    text-align: center;
+    
+    } 
 
 #content1 {
 	float: left;
@@ -12,11 +79,11 @@
 	background-color: #CCC;
 }
 
-#logo {
+/* #logo {
     float: left;
     height: 25%;
     
-}
+} */
 
 
 
@@ -39,7 +106,7 @@
     margin-top: 5px;
 }
 
-#container {overflow:hidden; background:#0f0;  margin-left: 5px;   width:100%; clear:both;background-color:green; repeat-y: 0%; border:thin #CCCCCC solid}
-#colleft {float:left; width:50%;}
-    #collright {float:left;  width:50%;}
+#container {background:#0f0;  margin-left: 10px;   width:100%;}
+#colleft {width:33%;}
+#collright {width:67%;}
     

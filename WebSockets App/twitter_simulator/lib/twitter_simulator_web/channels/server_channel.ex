@@ -22,9 +22,6 @@
     end
 
     def handle_in("updateFeed", %{"userName" => userName}, socket) do
-      # following_list = Server.get("user_table", userName, 2)
-
-      # mention_list = Server.get("user_table", userName, 4)
       following_tweetList = Server.feedData(userName)
       
 
