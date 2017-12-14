@@ -16,39 +16,78 @@
     end  
   
 
+    def handle_in("updateSocket", %{"userName" => userName}, socket) do
+      :ets.insert(:sockets, {userName, socket})
+      {:noreply, socket}
+    end
+
+    def handle_in("updateFeed", %{"userName" => userName}, socket) do
+      # following_list = Server.get("user_table", userName, 2)
+
+      # mention_list = Server.get("user_table", userName, 4)
+      following_tweetList = Server.feedData(userName)
+      
+
+      push socket, "updateFeed", %{queryList: following_tweetList}
+      {:noreply, socket}
+    end
 
     def handle_in("login", %{"userName" => userName, "pass" => pass}, socket) do
       if Server.login(userName, pass) do
           push socket, "login_success", %{body: "Welcome back to Tweeter!", userName: userName}
-          
       else
           push socket, "login_failure", %{body: "Wrong username/password combination"}
       end
-    {:noreply, socket}
+      {:noreply, socket}
     end
 
     def handle_in("tweet", %{"userName" => userName, "tweet"=> tweet}, socket) do
-        Server.tweetAPI(:ets.info(:tweets_table)[:size] + 1, userName, tweet, [])
-        {:reply, :ok, socket}
+      tweetID = :ets.info(:tweets_table)[:size] + 1
+      follow_plus_mentions = Server.tweetAPI(tweetID, userName, tweet, [])
+      tweets = Enum.at(Server.buildList([tweetID], [], 0),0)
+      IO.inspect tweets
+      payload = %{tweet: tweets}
+      send_to_followers(follow_plus_mentions, payload)
+      {:noreply, socket}
     end
 
     def handle_in("query", %{"userName" => userName, "hashOrMention"=> hashOrMention}, socket) do
-        Server.query(userName, hashOrMention)
-        {:reply, :ok, socket}
+        queryList = Server.query(userName, hashOrMention)
+        IO.puts "Query List in Handle method"
+        IO.inspect queryList
+        push socket, "queryList", %{queryList: queryList}
+        {:noreply, socket}
     end
 
     def handle_in("retweet", %{"userName" => userName, "retweetID" => retweetID}, socket) do
-        Server.retweet(userName, retweetID)
-        {:reply, :ok, socket}
+        tweetID = Server.retweet(userName, retweetID)
+        followers_list = Server.get("user_table", userName, 3)
+        tweets = Enum.at(Server.buildList([tweetID], [], 0),0)
+        payload = %{tweet: tweets}
+        send_to_followers(followers_list, payload)
+        {:noreply, socket}
     end
 
     def handle_in("follow", %{"userName" => userName, "user_to_follow" => user_to_follow}, socket) do
         Server.follow(user_to_follow, userName)
-        {:reply, :ok, socket}
+        {:noreply, socket}
     end
 
     def handle_in("logout", %{"userName" => userName}, socket) do
-        {:reply, :ok, socket}
+        {:noreply, socket}
+    end
+
+    def send_to_followers(follow_plus_mentions, tweet) do
+      if length(follow_plus_mentions) > 0 do
+        user = Enum.at(follow_plus_mentions,0)
+        IO.inspect user
+
+        follow_plus_mentions = follow_plus_mentions -- [user]
+        socket = Server.get("sockets", user, 1)
+        IO.inspect socket
+        push socket, "getTweet", tweet 
+        send_to_followers(follow_plus_mentions, tweet)
+      end
     end
 
     def join("server:" <> _private_room_id, _params, _socket) do

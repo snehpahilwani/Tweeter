@@ -114,8 +114,11 @@ if(document.getElementById("btn_follow")){
 if(document.getElementById("btn_query")){
   let link = window.location.href
   let userName = link.split("/")[link.split("/").length-1]
+  
   let hashOrMention = document.querySelector("#txt_query")
   document.getElementById("btn_query").onclick = function(){
+    let divArea = document.querySelector('#query');
+    divArea.innerHTML = "";
     channel.push("query", {userName: userName, hashOrMention: hashOrMention.value})
 };
 }
@@ -125,8 +128,8 @@ $(document).ready(function() {
   let length = link.split("/").length
   if(length>1){
     let userName = link.split("/")[link.split("/").length-1]
-    channel.push('updateSocket', {userName: userName});
-    channel.push('updateFeed', {userName: userName});
+    channel.push("updateSocket", {userName: userName});
+    channel.push("updateFeed", {userName: userName});
   }
   
 });
@@ -149,6 +152,54 @@ channel.on("signup_success", payload => {
 
 channel.on("signup_failure", payload => {
   alert(`${payload.body}`)
+})
+
+channel.on("queryList", payload => {
+  let divlist = $('#query');
+  // let divArea = document.querySelector('#query');
+  // divArea.value = "";
+  let queries = payload.queryList
+  // console.log(`${payload.queryList}`)
+  // alert(`${payload.queryList[0]}`)
+  // var queries = `${payload.queryList}`;
+  for(var i = 0; i< queries.length; i++){
+    console.log(`${payload.queryList[i].desc}`);
+    divlist.prepend(`${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
+  }
+  divlist.scrollTop;
+  //console.log(payload)
+  
+})
+
+channel.on("updateFeed", payload => {
+  let divlist = $('#feed');
+
+  let queries = payload.queryList
+  // console.log(`${payload.queryList}`)
+  // alert(`${payload.queryList[0]}`)
+  // var queries = `${payload.queryList}`;
+  for(var i = 0; i< queries.length; i++){
+    console.log(`${payload.queryList[i].desc}`);
+    divlist.prepend(`${payload.queryList[i].userName}: ${payload.queryList[i].desc} <br>`);
+  }
+  divlist.scrollTop;
+  //console.log(payload)
+  
+})
+
+
+channel.on("getTweet", payload => {
+  let divlist = $('#feed');
+  console.log(payload);
+  //let queries = payload.tweet
+  // console.log(`${payload.queryList}`)
+  // alert(`${payload.queryList[0]}`)
+  // var queries = `${payload.queryList}`;
+
+  divlist.prepend(`${payload.tweet.userName}: ${payload.tweet.desc} <br>`);
+  
+  divlist.scrollTop;
+  //console.log(payload)
 })
 // chatInput.addEventListener("keypress", event => {
 //   if(event.keyCode === 13){
