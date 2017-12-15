@@ -8,9 +8,9 @@
 
     def handle_in("signup", %{"userName" => userName, "pass" => pass}, socket) do
       if Server.signup(userName, pass) do
-          push socket, "signup_success", %{body: "Welcome to Tweeter!"}
+          push socket, "signup_success", %{body: "Welcome to Tweeter! Please login below."}
       else
-          push socket, "signup_failure", %{body: "User already exists!"}
+          push socket, "signup_failure", %{body: "User already exists! Please login or create a new user."}
       end
     {:noreply, socket}
     end  

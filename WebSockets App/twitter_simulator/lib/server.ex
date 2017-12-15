@@ -309,9 +309,9 @@ def populatelists(iter, list, hashtag_list, mention_list) do
     # IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
     # IO.puts "User to follow: "<>user_to_follow
     # IO.puts "User who wants to follow: "<>user_who_wants_to_follow
-    status = "followed"
+    status = "Followed " <> user_to_follow
     if get("user_table", user_to_follow, 0) == [] do
-      status = "invalid user"
+      status = "User does not exist!"
     else
 
     followersList_toFollow = :ets.match(:user_table, { "#{user_to_follow}", :"_", :"_", :"$1", :"_"})
