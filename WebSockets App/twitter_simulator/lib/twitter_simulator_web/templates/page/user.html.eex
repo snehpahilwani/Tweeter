@@ -1,37 +1,32 @@
+
 <center><h2>Tweeter</h2></center>
 <div id="container">
     <div id="colleft" style="float:left;">
-
-
-        <div id="query">
-            Placeholder for query
-                        
-        </div>
-        
         <div id="left_queries" style="float:left;">
-        </br>
-        Follow: <input id="txt_follow" class="secondpage_input"></input></br><button id="btn_follow">Follow</button></br></br>
-        Query: <input id="txt_query" class="secondpage_input"></input></br><button id="btn_query">Query</button></br></br>
+        
+        Follow: <input id="txt_follow" class="secondpage_input"></input></br></br><button id="btn_follow" class="secondleft">Follow</button></br></br>
+        Query: <input id="txt_query" class="secondpage_input"></input></br></br><button id="btn_query" class="secondleft">Query</button></br></br>
+                Query Results: </br>
         </div>
-<%#         
-        <div id="query_left">
+        </br>
 
-        </div> %>
+        <div id="query">                        
+        </div>
+
     </div>
     <div id="collright" style="float:left;" >
         <div id="right_queries">Tweet: </br>
-            <input id="txt_tweet" class="secondpage_input" ></input></br>
-            <button id="btn_tweet">Tweet</button></br></br>
-            ReTweet: </br><input id="txt_retweet" class="secondpage_input"></input></br>
-            <button id="btn_retweet">ReTweet</button>    
+            <input id="txt_tweet" class="secondpage_input" ></input></br></br>
+            <button id="btn_tweet" class="secondright">Tweet</button></br></br>
+            ReTweet: </br><input id="txt_retweet" class="secondpage_input"></input></br></br>
+            <button id="btn_retweet" class="secondright">ReTweet</button>  </br>  
             
         </div>
+        </br>
+        Feed:</br>
         <div id="feed">        
-                Placeholder for feed 
+                
         </div>
     </div>
-    <%# <div id="query_right">
-        
-    </div> %>
     <br style="clear:both;"/>
 </div>

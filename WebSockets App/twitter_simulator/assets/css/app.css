@@ -1,6 +1,14 @@
 /* This file is for your main application css. */
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
+div{
+    font-family: "Roboto", sans-serif;    
+}
+
+body{
+    background-color: rgb(160, 192, 223);
+}
+
 div.container4 {
     position: relative;
     z-index: 1;
@@ -30,6 +38,7 @@ div.container4 {
     background: #f2f2f2;
     border: 0;
     width:90%;
+    margin: 10px;
 
     padding: 15px;
     box-sizing: border-box;
@@ -55,6 +64,39 @@ button.firstpage {
         transition: all 0.3 ease;
         cursor: pointer;   
 }
+
+button.secondleft {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4CAF50;
+    width: 40%;
+    border: 0;
+    margin-left: 10px;
+    padding: 15px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;   
+}
+
+button.secondright{
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4CAF50;
+    width: 20%;
+    border: 0;
+    margin-left: 10px;
+    padding: 15px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;   
+}
+
 
 .form button:hover,.form button:active,.form button:focus {
     background: #43A047;
@@ -98,31 +140,41 @@ padding: 20px;
 #query{
     
     float: left;
-    height: 200px;
+    height: 300px;
     width: 50%;
-    
+    font-family: "Roboto", sans-serif;
     overflow: scroll;
     background-color: #FFFFFF;
     text-align: left;
     margin-right: 5px;
     margin-left: 5px; 
     margin-top: 5px;
+    padding: 10px;
 }
 
 #feed{
     float: left;
-    height: 400px;
-    width: 50%;
-    
+    height: 300px;
+    width: 90%;
+    font-family: "Roboto", sans-serif;
     overflow: scroll;
     background-color: #FFFFFF;
     text-align: left;
     margin-right: 5px;
     margin-left: 5px; 
     margin-top: 5px;
+    padding: 10px;
 }
 
-#container {background: rgb(102, 165, 228);  width:100%; height:100%}
+#container {width:90%; height:90%;
+    position: relative;
+    z-index: 1;
+    background: rgb(102, 165, 228);
+    
+    margin: 0 auto 100px;
+    padding: 30px;
+    
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);}
 #colleft {width:33%; }
 #collright {width:67%;  }
     
