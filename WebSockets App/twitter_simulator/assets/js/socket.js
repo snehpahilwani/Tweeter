@@ -96,7 +96,7 @@ $(document).ready(function() {
 
 channel.on("login_success", payload => {
   alert(`${payload.body}`)
-  window.location.href = "http://localhost:4000/user/" + `${payload.userName}`
+  window.location.href = "/user/" + `${payload.userName}`
 })
 
 channel.on("follow_status", payload => {

@@ -254,7 +254,6 @@ defmodule Server do
     else
       feedList
     end
-    #feedList
   end
 
   def getTweets(user_tweets, resList) do
@@ -268,7 +267,6 @@ defmodule Server do
     else
       resList
     end
-    #resList
   end
 
   def parse(tweet) do
@@ -306,9 +304,6 @@ def populatelists(iter, list, hashtag_list, mention_list) do
   end
 
   def follow(user_to_follow, user_who_wants_to_follow) do
-    # IO.puts "Follow  request received from" <> "#{user_who_wants_to_follow}" <> "to follow" <> "#{user_to_follow}"
-    # IO.puts "User to follow: "<>user_to_follow
-    # IO.puts "User who wants to follow: "<>user_who_wants_to_follow
     status = "Followed " <> user_to_follow
     if get("user_table", user_to_follow, 0) == [] do
       status = "User does not exist!"
@@ -322,28 +317,15 @@ def populatelists(iter, list, hashtag_list, mention_list) do
  
     mentionList_toFollow = get("user_table", user_to_follow, 4)
     mentionList_user_who_wants_to_follow = get("user_table", user_who_wants_to_follow, 4)
-    # mentionList_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),4)
-    # mentionList_user_who_wants_to_follow = elem(Enum.at(:ets.lookup(:user_table, "#{user_who_wants_to_follow}"),0),4)
+
 
     password_toFollow = get("user_table", user_to_follow, 1)
     password_user_who_wants_to_follow = get("user_table", user_who_wants_to_follow, 1)
-
-    # password_toFollow = elem(Enum.at(:ets.lookup(:user_table, "#{user_to_follow}"),0),1)
-    # password_user_who_wants_to_follow = elem(Enum.at(:ets.lookup(:user_table, "#{user_who_wants_to_follow}"),0),1)
-
-    # IO.puts user_to_follow <> " Following list before"
-    # IO.inspect followingList_toFollow
-    # IO.puts user_to_follow <> " Following list after"
     if not empty? followingList_toFollow do
       final_followingList_to_follow = Enum.at(Enum.at(followingList_toFollow,0),0)
     end
-    # IO.inspect final_followingList_to_follow
 
 
-    #newFollowerList = Enum.at(Enum.at(followersList_toFollow,0),0)
-    # IO.puts user_to_follow <> " Follower list before"
-    # IO.inspect followersList_toFollow
-    # IO.puts user_to_follow <> " Follower list after"
     if not empty? followersList_toFollow do
       final_followersList_to_follow =  Enum.at(Enum.at(followersList_toFollow,0),0)
       if not Enum.member?(final_followersList_to_follow, user_who_wants_to_follow) do
@@ -351,20 +333,11 @@ def populatelists(iter, list, hashtag_list, mention_list) do
         :ets.insert(:user_table, {"#{user_to_follow}", password_toFollow, final_followingList_to_follow, final_followersList_to_follow, mentionList_toFollow})
       end
     end
-    # IO.inspect final_followersList_to_follow
 
-
-    # IO.puts user_who_wants_to_follow<>" Follower list before"
-    # IO.inspect followersList_user_who_wants_to_follow
-    # IO.puts user_who_wants_to_follow<>" Follower list after"
     if not empty? followersList_user_who_wants_to_follow do
       final_followersList_user_who_wants_to_follow = Enum.at(Enum.at(followersList_user_who_wants_to_follow,0),0)
     end
-    # IO.inspect final_followersList_user_who_wants_to_follow
 
-    # IO.puts user_who_wants_to_follow<>" Following list before"
-    # IO.inspect followingList_user_who_wants_to_follow
-    # IO.puts user_who_wants_to_follow<>" Following list after"
     if not empty? followingList_user_who_wants_to_follow do
       final_followingList_user_who_wants_to_follow = Enum.at(Enum.at(followingList_user_who_wants_to_follow,0),0)
       if not Enum.member?(final_followingList_user_who_wants_to_follow, user_to_follow) do
@@ -374,7 +347,7 @@ def populatelists(iter, list, hashtag_list, mention_list) do
     end
     IO.inspect :ets.lookup(:user_table, "#{user_who_wants_to_follow}")
     IO.inspect :ets.lookup(:user_table, "#{user_to_follow}")
-    # IO.inspect final_followingList_user_who_wants_to_follow
+    
     end
     status
   end
