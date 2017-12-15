@@ -1,11 +1,11 @@
   <center><div class = "container4">
-  <logo>
+  
  <h2><%= gettext "Welcome to %{name}!", name: "Tweeter" %></h2>
     <p>
-  <input id="txt_userName" type="text" placeholder="username" ></input></br></br>
-  <input id="txt_pass" type="password" placeholder="password" ></input></br></br>
+  <input id="txt_userName" type="text" placeholder="username" class="firstpage_input" ></input></br></br>
+  <input id="txt_pass" type="password" placeholder="password"   class="firstpage_input" ></input></br></br>
 
-  <button class="firstpage" id="btn_login">Login</button></br></br>
+  <button class="firstpage" id="btn_login" >Login</button></br></br>
   <button class="firstpage" id="btn_signup">Signup</button>
 
 

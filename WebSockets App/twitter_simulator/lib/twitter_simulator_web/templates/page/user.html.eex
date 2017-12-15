@@ -1,25 +1,37 @@
-
+<center><h2>Tweeter</h2></center>
 <div id="container">
-    <div id="colleft">
-        <div id="feed">
-            Placeholder for feed
-        </div>
-        </br>
+    <div id="colleft" style="float:left;">
+
+
         <div id="query">
             Placeholder for query
+                        
+        </div>
+        
+        <div id="left_queries" style="float:left;">
+        </br>
+        Follow: <input id="txt_follow" class="secondpage_input"></input></br><button id="btn_follow">Follow</button></br></br>
+        Query: <input id="txt_query" class="secondpage_input"></input></br><button id="btn_query">Query</button></br></br>
+        </div>
+<%#         
+        <div id="query_left">
+
+        </div> %>
+    </div>
+    <div id="collright" style="float:left;" >
+        <div id="right_queries">Tweet: </br>
+            <input id="txt_tweet" class="secondpage_input" ></input></br>
+            <button id="btn_tweet">Tweet</button></br></br>
+            ReTweet: </br><input id="txt_retweet" class="secondpage_input"></input></br>
+            <button id="btn_retweet">ReTweet</button>    
+            
+        </div>
+        <div id="feed">        
+                Placeholder for feed 
         </div>
     </div>
-    <div id="collright">
-    
-        Tweet: </br><input id="txt_tweet" class="secondpage_input"></input></br></br>
-        ReTweet: <input id="txt_retweet" class="secondpage_input"></input></br></br>
-        Follow: <input id="txt_follow" class="secondpage_input"></input></br></br>
-        Query: <input id="txt_query" class="secondpage_input"></input></br></br>
-        <button id="btn_tweet">Tweet</button>
-        <button id="btn_retweet">ReTweet</button>
-        <button id="btn_query">Query</button>
-        <button id="btn_follow">Follow</button>
-
-    </div>
+    <%# <div id="query_right">
+        
+    </div> %>
     <br style="clear:both;"/>
 </div>
