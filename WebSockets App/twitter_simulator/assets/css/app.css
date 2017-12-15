@@ -37,7 +37,7 @@ div.container4 {
     outline: 0;
     background: #f2f2f2;
     border: 0;
-    width:90%;
+    width:91%;
     margin: 10px;
 
     padding: 15px;
@@ -122,12 +122,6 @@ padding: 20px;
 	background-color: #CCC;
 }
 
-/* #logo {
-    float: left;
-    height: 25%;
-    
-} */
-
 
 
 #search{
@@ -138,10 +132,10 @@ padding: 20px;
 }
 
 #query{
-    
+    position: relative;
     float: left;
     height: 300px;
-    width: 50%;
+    width: 80%;
     font-family: "Roboto", sans-serif;
     overflow: scroll;
     background-color: #FFFFFF;
@@ -153,6 +147,7 @@ padding: 20px;
 }
 
 #feed{
+    position: relative;
     float: left;
     height: 300px;
     width: 90%;
@@ -172,9 +167,31 @@ padding: 20px;
     background: rgb(102, 165, 228);
     
     margin: 0 auto 100px;
-    padding: 30px;
+    padding-left: 30px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    
     
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);}
-#colleft {width:33%; }
-#collright {width:67%;  }
+#colleft {width:33%;
+    position: relative;
+    z-index: 1;
+    background: #A0C0DF;
+    max-width: 360px;
+    margin: 10px;
+    padding: 30px;
+    
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+#collright {width:67%;  
+    position: relative;
+    z-index: 1;
+    background: #A0C0DF;
+    max-width: 800px;
+    margin: 10px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 30px;
+    
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);}
     
